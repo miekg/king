@@ -1,4 +1,4 @@
-package completion
+package king
 
 import (
 	"bytes"
@@ -628,6 +628,7 @@ func writeCmdAliases(buf io.StringWriter, cmd *kong.Node) {
 	writeString(buf, `    fi`)
 	writeString(buf, "\n")
 }
+
 func writeArgAliases(buf io.StringWriter, cmd *kong.Node) {
 	writeString(buf, "    noun_aliases=()\n")
 	sort.Strings(cmd.Aliases)

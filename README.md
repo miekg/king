@@ -4,6 +4,6 @@
 ability to generate (good) shell completions.
 
 This package is copied from [gum](https://github.com/charmbracelet/gum) and made into a standalone library +
-some extra features, like telling (via struct tags) how certain things must be completed. See godoc.
+some extra features, like telling (via struct tags) how certain things must be completed. Also see godoc.
 
 I use [zsh](https://zsh.org), so this is where my initial focus it.
