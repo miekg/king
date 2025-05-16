@@ -9,13 +9,20 @@ import (
 	"github.com/alecthomas/kong"
 )
 
+type Completer interface {
+	Completion(*kong.Node, string)
+	Write() error
+}
+
+var _ Completer = (*Zsh)(nil)
+
 // commandName returns the full path of the kong node. Any alias is ignored.
 func commandName(n *kong.Node) (out string) {
 	root := n
 	for root.Parent != nil {
 		root = root.Parent
 	}
-	return root.Name + identifier(n)
+	return strings.Replace(root.Name+identifier(n), ".", "_", -1)
 }
 
 // identifier creates a name suitable for using as an identifier in shell code.
@@ -45,22 +52,35 @@ func hasCommands(cmd *kong.Node) bool {
 // hasPositional returns true if there are positional arguments.
 func hasPositional(cmd *kong.Node) bool { return len(cmd.Positional) > 0 }
 
-// completion returns the completion.
-func completion(cmd *kong.Value) string {
+// completion returns the completion for the shell.
+func completion(cmd *kong.Value, shell string) string {
 	comp := cmd.Tag.Get("completion")
 	if comp == "" {
 		return ""
 	}
 	if strings.HasPrefix(comp, "<") && strings.HasSuffix(comp, ">") {
+		comp := comp[1 : len(comp)-2]
 		switch comp {
 		case "file", "directory":
-			return "_files"
+			if shell == "zsh" {
+				return "_files"
+			}
+			return comp
 		case "group":
-			return "_groups"
+			if shell == "zsh" {
+				return "_groups"
+			}
+			return comp
 		case "user":
-			return "_users"
+			if shell == "zsh" {
+				return "_users"
+			}
+			return comp
 		case "export":
-			return "_parameters"
+			if shell == "zsh" {
+				return "_parameters"
+			}
+			return comp
 		}
 	}
 	return comp

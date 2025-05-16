@@ -38,7 +38,7 @@ compdef _%[1]s %[1]s
 `
 	var out strings.Builder
 	fmt.Fprintf(&out, format, name)
-	z.gen(&out, k)
+	z.gen(&out, k, name)
 	z.completion = []byte(out.String())
 	z.k = k
 	z.name = name
@@ -105,10 +105,10 @@ func (z Zsh) writePositional(buf io.StringWriter, cmd *kong.Node) {
 	// '1: : _values "compname" $(c volume-server list --comp)'  -- when there is completion
 	// '2:yubikey:' -- when there is no completion, this is the name of the node.
 	for i, p := range cmd.Positional {
-		if completion(p) == "" {
+		if completion(p, "zsh") == "" {
 			writeString(buf, fmt.Sprintf("        \"%d:%s:\"", i+1, strings.ToLower(p.Name)))
 		} else {
-			writeString(buf, fmt.Sprintf("        '%d: : _values \"%s\" $(%s)'", i+1, compname(p), completion(p)))
+			writeString(buf, fmt.Sprintf("        '%d: : _values \"%s\" $(%s)'", i+1, compname(p), completion(p, "zsh")))
 		}
 		if i < len(cmd.Positional)-1 {
 			writeString(buf, " \\\n")
@@ -137,16 +137,20 @@ func (z Zsh) writeCommands(buf io.StringWriter, cmd *kong.Node) {
 	}
 }
 
-func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node) {
+func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node, name string) {
 	for _, c := range cmd.Children {
 		if c == nil || c.Hidden {
 			continue
 		}
-		z.gen(buf, c)
+		z.gen(buf, c, "")
 	}
 	cmdName := commandName(cmd)
 
-	writeString(buf, fmt.Sprintf("_%s() {\n", cmdName))
+	if name != "" {
+		writeString(buf, fmt.Sprintf("_%s() {\n", name))
+	} else {
+		writeString(buf, fmt.Sprintf("_%s() {\n", cmdName))
+	}
 	if hasCommands(cmd) {
 		writeString(buf, "    local line state\n")
 	}
