@@ -42,6 +42,39 @@ func hasCommands(cmd *kong.Node) bool {
 	return false
 }
 
+// hasPositional returns true if there are positional arguments.
+func hasPositional(cmd *kong.Node) bool { return len(cmd.Positional) > 0 }
+
+// completion returns the completion.
+func completion(cmd *kong.Value) string {
+	comp := cmd.Tag.Get("completion")
+	if comp == "" {
+		return ""
+	}
+	if strings.HasPrefix(comp, "<") && strings.HasSuffix(comp, ">") {
+		switch comp {
+		case "file", "directory":
+			return "_files"
+		case "group":
+			return "_groups"
+		case "user":
+			return "_users"
+		case "export":
+			return "_parameters"
+		}
+	}
+	return comp
+}
+
+// compname returns the compname, if there is no compname, cmd.Name is returned.
+func compname(cmd *kong.Value) string {
+	compname := cmd.Tag.Get("compname")
+	if compname == "" {
+		return cmd.Name
+	}
+	return compname
+}
+
 // writeString writes a string into a buffer, and checks if the error is not nil.
 func writeString(b io.StringWriter, s string) {
 	if _, err := b.WriteString(s); err != nil {
@@ -50,7 +83,7 @@ func writeString(b io.StringWriter, s string) {
 	}
 }
 
-func flagPossibleValues(flag *kong.Flag) []string {
+func flagEnums(flag *kong.Flag) []string {
 	values := make([]string, 0)
 	for _, enum := range flag.EnumSlice() {
 		if strings.TrimSpace(enum) != "" {

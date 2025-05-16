@@ -68,7 +68,7 @@ func (f Fish) gen(buf io.StringWriter, cmd *kong.Node) {
 			)
 		}
 		if !f.IsBool() {
-			enums := flagPossibleValues(f)
+			enums := flagEnums(f)
 			if len(enums) > 0 {
 				_, _ = buf.WriteString(fmt.Sprintf(" -xa '%s'", strings.Join(enums, " ")))
 			} else {

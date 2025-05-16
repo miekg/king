@@ -14,7 +14,7 @@ type T struct {
 type T1 struct {
 	Status *string `enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
 
-	Volume string `arg:"" placeholder:"server[:vol]|ID|vol" help:"Volume to change." completion:"c volume list --comp" type:"existingvolume"`
+	Volume string `arg:"" placeholder:"server[:vol]|ID|vol" help:"Volume to change." completion:"echo a b c" type:"existingvolume"`
 	Arg    string `arg:"" help:"This is an arg."`
 }
 
