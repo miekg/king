@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"strings"
 
@@ -14,13 +15,13 @@ import (
 type Bash struct{}
 
 // Run generates bash completion script.
-func (b Bash) Run(ctx *kong.Context) error {
+func (b *Bash) Run(k *kong.Node, name string) error {
 	buf := new(bytes.Buffer)
-	writePreamble(buf, ctx.Model.Name)
-	b.gen(buf, ctx.Model.Node)
-	writePostscript(buf, ctx.Model.Name)
+	writePreamble(buf, name)
+	b.gen(buf, k)
+	writePostscript(buf, name)
 
-	_, err := fmt.Fprint(ctx.Stdout, buf.String())
+	_, err := fmt.Fprint(os.Stdout, buf.String())
 	if err != nil {
 		return fmt.Errorf("unable to generate bash completion: %v", err)
 	}
@@ -99,14 +100,6 @@ __%[1]s_debug()
     if [[ -n ${BASH_COMP_DEBUG_FILE:-} ]]; then
         echo "$*" >> "${BASH_COMP_DEBUG_FILE}"
     fi
-}
-
-# Homebrew on Macs have version 1.3 of bash-completion which doesn't include
-# _init_completion. This is a very minimal version of that function.
-__%[1]s_init_completion()
-{
-    COMPREPLY=()
-    _get_comp_words_by_ref "$@" cur prev words cword
 }
 
 __%[1]s_index_of_word()
@@ -499,7 +492,6 @@ else
 fi
 
 `, name, name, name, name))
-	writeString(buf, "# ex: ts=4 sw=4 et filetype=sh\n")
 }
 
 func writeCommands(buf io.StringWriter, cmd *kong.Node) {
