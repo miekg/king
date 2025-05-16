@@ -23,5 +23,9 @@ func (t *T1) Run(ctx *kong.Context) error { return nil }
 func TestZsh(t *testing.T) {
 	parser := kong.Must(&T{})
 	parser.Model.Name = "mijnexe"
-	Zsh{}.Completion(parser)
+	z := &Zsh{}
+	z.Completion(parser)
+	if err := z.Write(); err != nil {
+		t.Fatal(err)
+	}
 }
