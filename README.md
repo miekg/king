@@ -26,3 +26,5 @@ The following actions are supported:
 - "group"
 - "user"
 - "export"
+
+and are converted to the correct construct in the completion that is generated.
