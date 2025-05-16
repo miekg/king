@@ -92,9 +92,13 @@ func (z Zsh) writeCommands(buf io.StringWriter, cmd *kong.Node) {
 		if c == nil || c.Hidden {
 			continue
 		}
+		for _, a := range c.Aliases {
+			z.writeCommand(buf, &kong.Node{Name: a, Help: c.Help})
+			buf.WriteString(" \\\n")
+		}
 		z.writeCommand(buf, c)
 		if i < len(cmd.Children)-1 {
-			_, _ = buf.WriteString(" \\")
+			buf.WriteString(" \\")
 		}
 		writeString(buf, "\n")
 	}
@@ -130,15 +134,17 @@ func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node) {
 			if c == nil || c.Hidden {
 				continue
 			}
+			for _, a := range c.Aliases {
+				writeString(buf, fmt.Sprintf("                %s)\n", a))
+				writeString(buf, fmt.Sprintf("                    _%s;;\n", commandName(c)))
+			}
 			writeString(buf, fmt.Sprintf("                %s)\n", c.Name))
-			writeString(buf, fmt.Sprintf("                    _%s\n", commandName(c)))
-			writeString(buf, "                    ;;\n")
+			writeString(buf, fmt.Sprintf("                    _%s;;\n", commandName(c)))
 		}
 		writeString(buf, "            esac\n")
 		writeString(buf, "            ;;\n")
 		writeString(buf, "    esac\n")
 	}
-	// writeArgAliases(buf, cmd)
 	writeString(buf, "\n")
 	writeString(buf, "}\n\n")
 }

@@ -601,7 +601,7 @@ func writeFlags(buf io.StringWriter, cmd *kong.Node) {
 `)
 
 	for _, flag := range cmd.Flags {
-		if nonCompletableFlag(flag) {
+		if flag.Hidden {
 			continue
 		}
 		writeFlag(buf, flag, cmd)

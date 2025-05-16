@@ -9,18 +9,28 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-// Completion command.
-type Completion struct {
-	Bash Bash `cmd:"" help:"Generate the autocompletion script for bash"`
-	Zsh  Zsh  `cmd:"" help:"Generate the autocompletion script for zsh"`
-	Fish Fish `cmd:"" help:"Generate the autocompletion script for fish"`
+// commandName returns the full path of the kong node. Any alias is ignored.
+func commandName(n *kong.Node) (out string) {
+	root := n
+	for root.Parent != nil {
+		root = root.Parent
+	}
+	return root.Name + identifier(n)
 }
 
-func commandName(cmd *kong.Node) string {
-	commandName := cmd.FullPath()
-	commandName = strings.ReplaceAll(commandName, " ", "_")
-	commandName = strings.ReplaceAll(commandName, ":", "__")
-	return commandName
+// identifier creates a name suitable for using as an identifier in shell code.
+func identifier(n *kong.Node) (out string) {
+	if n.Parent != nil {
+		out += identifier(n.Parent)
+	}
+	switch n.Type {
+	case kong.CommandNode:
+		out += "_" + n.Name
+	case kong.ArgumentNode:
+		out += "_" + n.Name
+	default:
+	}
+	return out
 }
 
 func hasCommands(cmd *kong.Node) bool {
@@ -32,21 +42,12 @@ func hasCommands(cmd *kong.Node) bool {
 	return false
 }
 
-//nolint:deadcode,unused
-func isArgument(cmd *kong.Node) bool {
-	return cmd.Type == kong.ArgumentNode
-}
-
 // writeString writes a string into a buffer, and checks if the error is not nil.
 func writeString(b io.StringWriter, s string) {
 	if _, err := b.WriteString(s); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
-}
-
-func nonCompletableFlag(flag *kong.Flag) bool {
-	return flag.Hidden
 }
 
 func flagPossibleValues(flag *kong.Flag) []string {
