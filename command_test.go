@@ -11,7 +11,7 @@ type T struct {
 	Do   T1 `cmd:"" aliases:"d" help:"do it"`
 	More T1 `cmd:"" aliases:"m" help:"do it again"`
 
-	EvenMore T2 `cmd:""`
+	EvenMore T2 `cmd:"" aliases:"e" help:"do it another time"`
 }
 
 type T1 struct {
@@ -22,11 +22,27 @@ type T1 struct {
 }
 
 type T2 struct {
-	DoEvenMore bool `cmd:""`
+	DoEvenMore   T3 `cmd:""`
+	WhatEvenMore T4 `cmd:""`
 }
+
+type (
+	T3 struct{}
+	T4 struct{}
+)
 
 func TestCommands(t *testing.T) {
 	parser := kong.Must(&T{})
 	cmds := commands(parser.Model.Node)
-	fmt.Printf("%v\n", cmds)
+	for i := range cmds {
+		println(cmds[i])
+	}
+}
+
+func TestNodeForCommand(t *testing.T) {
+	parser := kong.Must(&T{})
+	node := nodeForCommand(parser.Model.Node, "do")
+	fmt.Printf("%v\n", node)
+	node = nodeForCommand(parser.Model.Node, "bla")
+	fmt.Printf("%v\n", node)
 }

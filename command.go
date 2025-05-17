@@ -3,7 +3,9 @@ package king
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -11,6 +13,7 @@ import (
 
 type Completer interface {
 	Completion(*kong.Node, string)
+	Out() []byte
 	Write() error
 }
 
@@ -52,19 +55,77 @@ func hasCommands(cmd *kong.Node) bool {
 	return false
 }
 
-func commands(node *kong.Node) (cmds []string) {
+// commands returns all possible paths through the (sub)command structure of the kong.Node.
+func commands(node *kong.Node) []string {
 	if node == nil {
-		return cmds
+		return nil
 	}
 
-	if node.Type == kong.CommandNode && !node.Hidden {
-		cmds = append(cmds, node.Name)
+	var paths [][]string
+	var dfs func(node *kong.Node, currentPath []string)
+	dfs = func(node *kong.Node, currentPath []string) {
+		if node.Hidden {
+			return
+		}
+
+		if node.Type == kong.CommandNode {
+			currentPath = append(currentPath, node.Name)
+		}
+
+		if len(node.Children) == 0 {
+			paths = append(paths, currentPath)
+			return
+		}
+
+		for _, c := range node.Children {
+			dfs(c, currentPath)
+		}
 	}
 
-	for _, c := range node.Children {
-		cmds = append(cmds, commands(c)...)
+	dfs(node, []string{})
+	// Now we have all paths, e.g. [[do] [more] [even-more do-even-more] [even-more what-even-more]]
+	// But we need all posible ones, e.g. 'do', 'more', 'even-more', 'even-more do-even-more', etc.
+	// So iterator over them and split each and add them to a map by increasing the number of fields.
+	m := map[string]struct{}{}
+	for _, p := range paths {
+		f1 := ""
+		sep := ""
+		for _, p1 := range p {
+			fields := strings.Fields(p1)
+			for _, f := range fields {
+				f1 += sep + f
+				m[f1] = struct{}{}
+				sep = " "
+			}
+		}
 	}
-	return cmds
+	keys := slices.Collect(maps.Keys(m))
+	slices.SortFunc(keys, func(a, b string) int { return len(b) - len(a) })
+	return keys
+}
+
+// nodeForCommand uses the trace string (which is a possible command line invocation to find the last node and returns that node.
+func nodeForCommand(cmd *kong.Node, trace string) *kong.Node {
+	var dfs func(*kong.Node, []string) *kong.Node
+	dfs = func(node *kong.Node, fields []string) *kong.Node {
+		if node.Name == fields[0] && len(fields) == 1 {
+			return node
+		}
+
+		if node.Name == fields[0] {
+			fields = fields[1:]
+		}
+		for _, c := range node.Children {
+			if n := dfs(c, fields); n != nil {
+				return n
+			}
+		}
+		return nil
+	}
+
+	fields := strings.Fields(trace)
+	leaf := dfs(cmd, fields)
+	return leaf
 }
 
 // hasPositional returns true if there are positional arguments.

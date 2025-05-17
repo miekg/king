@@ -16,6 +16,8 @@ type Zsh struct {
 	completion []byte
 }
 
+func (z *Zsh) Out() []byte { return z.completion }
+
 // Write writes the completion in z to the file "_" + z.name.
 func (z *Zsh) Write() error {
 	if z.k == nil {

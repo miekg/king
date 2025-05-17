@@ -16,6 +16,8 @@ type Bash struct {
 	completion []byte
 }
 
+func (b *Bash) Out() []byte { return b.completion }
+
 // Write writes the completion to file b.name".bash".
 func (b *Bash) Write() error {
 	if b.k == nil {
@@ -61,13 +63,50 @@ func (b Bash) writeFilterFunc(buf io.StringWriter, name string) {
 	writeString(buf, fmt.Sprintf(format, name))
 }
 
-func (b Bash) writeCommands(cmd *kong.Node) {
+func (b Bash) writeFlags(buf io.StringWriter, cmd *kong.Node) {
+	for i, f := range cmd.Flags {
+		if f.Hidden {
+			continue
+		}
+		writeString(buf, "--"+f.Name)
+		if f.Short != 0 {
+			writeString(buf, fmt.Sprintf("-%c", f.Short))
+		}
+		if i < len(cmd.Flags)-1 {
+			writeString(buf, " ")
+		}
+	}
+}
+
+func (b Bash) writeCommands(buf io.StringWriter, cmd *kong.Node) {
 	// get a list of all commands possible with the longest chains first, so the case works.
+	cmds := commands(cmd)
+	// now for each cmd, we also need to find the last node there so get the flags.
+	for _, n := range cmds {
+		println("N", n)
+		writeString(buf, fmt.Sprintf(`    '%s'*)`+"\n", n))
+		if leaf := nodeForCommand(cmd, n); leaf != nil {
+			b.writeFlags(buf, leaf)
+		}
+	}
 }
 
 func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
 	b.writeFilterFunc(buf, name)
+
+	cmdName := commandName(cmd)
+	if name != "" {
+		writeString(buf, fmt.Sprintf("_%s_completions() {\n", name))
+	} else {
+		writeString(buf, fmt.Sprintf("_%s_completions() {\n", cmdName))
+	}
+	writeString(buf, `  local cur=${COMP_WORDS[COMP_CWORD]}
+  local compwords=("${COMP_WORDS[@]:1:$COMP_CWORD-1}")
+  local compline="${compwords[*]}"
+
+  case "$compline" in
+`)
 	if hasCommands(cmd) {
-		b.writeCommands(cmd)
+		b.writeCommands(buf, cmd)
 	}
 }
