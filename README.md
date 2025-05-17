@@ -16,7 +16,8 @@ Any struct field can have 2 extra tags:
   performed. I.e. it could be "users" when the completion is trying to find users. If not given it the name of
   kong.Node is used (usually the field name in the struct).
 
-I use [zsh](https://zsh.org), so this is where my initial focus is.
+I use [zsh](https://zsh.org), so this is where my initial focus is. The
+[bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
 ## Supported "actions"
 
@@ -27,4 +28,4 @@ The following actions are supported:
 - "user"
 - "export"
 
-and are converted to the correct construct in the completion that is generated.
+And are converted to the correct construct in the completion that is generated.

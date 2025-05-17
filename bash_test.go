@@ -9,6 +9,8 @@ import (
 func TestBash(t *testing.T) {
 	parser := kong.Must(&T{})
 	b := &Bash{}
-	b.Run(parser.Model.Node, "mijnexe")
-	// mijnexe.bash
+	b.Completion(parser.Model.Node, "mijnexe")
+	if err := b.Write(); err != nil {
+		t.Fatal(err)
+	}
 }

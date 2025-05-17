@@ -14,7 +14,10 @@ type Completer interface {
 	Write() error
 }
 
-var _ Completer = (*Zsh)(nil)
+var (
+	_ Completer = (*Zsh)(nil)
+	_ Completer = (*Bash)(nil)
+)
 
 // commandName returns the full path of the kong node. Any alias is ignored.
 func commandName(n *kong.Node) (out string) {
@@ -47,6 +50,21 @@ func hasCommands(cmd *kong.Node) bool {
 		}
 	}
 	return false
+}
+
+func commands(node *kong.Node) (cmds []string) {
+	if node == nil {
+		return cmds
+	}
+
+	if node.Type == kong.CommandNode && !node.Hidden {
+		cmds = append(cmds, node.Name)
+	}
+
+	for _, c := range node.Children {
+		cmds = append(cmds, commands(c)...)
+	}
+	return cmds
 }
 
 // hasPositional returns true if there are positional arguments.

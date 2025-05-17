@@ -9,14 +9,14 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-// Zsh is used to create completions for the Zsh shell.
+// Zsh is a zsh completion generator.
 type Zsh struct {
 	k          *kong.Node
 	name       string
 	completion []byte
 }
 
-// Write writes the completion in z to the file "_" + k.Model.Name.
+// Write writes the completion in z to the file "_" + z.name.
 func (z *Zsh) Write() error {
 	if z.k == nil {
 		return fmt.Errorf("no kong node")
