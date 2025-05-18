@@ -36,14 +36,14 @@ func (b *Bash) Completion(k *kong.Node, name string) {
 `
 	var out strings.Builder
 	fmt.Fprintf(&out, format, name)
-	b.gen(&out, k, name)
+	b.name = name
+	b.gen(&out, k)
 	b.completion = []byte(out.String())
 	b.k = k
-	b.name = name
 }
 
-func (b Bash) writeFilterFunc(buf io.StringWriter, name string) {
-	format := `_%[1]s_completions_filter() {
+func (b Bash) writeFilterFunc(buf io.StringWriter) {
+	format := `_%[1]s_filter() {
   COMP_REPLY=()
   local words="$1"
   local cur=${COMP_WORDS[COMP_CWORD]}
@@ -60,12 +60,12 @@ func (b Bash) writeFilterFunc(buf io.StringWriter, name string) {
   fi
 }
 `
-	writeString(buf, fmt.Sprintf(format, name))
+	writeString(buf, fmt.Sprintf(format, b.name))
 }
 
 func (b Bash) compReply(completions []string) string {
-	format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "%s")" -- "$cur")` + "\n"
-	return fmt.Sprintf(format, strings.Join(completions, " "))
+	format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_%s_filter "%s")" -- "$cur")` + "\n"
+	return fmt.Sprintf(format, b.name, strings.Join(completions, " "))
 }
 
 func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string) {
@@ -77,7 +77,7 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 		p = parents[0] + " "
 	}
 	// 'user add'*'--backup-backend')
-	//   while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "s3")" -- "$cur")
+	//   while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_xxx_filter "s3")" -- "$cur")
 	//   ;;
 	completions := []string{"MAKEN"}
 	writeString(buf, fmt.Sprintf(`    '%s'*'--%s')`+"\n", strings.TrimSpace(p), flag.Name))
@@ -104,7 +104,7 @@ func (b Bash) writeCommand(buf io.StringWriter, cmd *kong.Node, parents ...strin
 		return
 	}
 	//'group add'*)
-	//  while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "--gid --auto --man --help")" -- "$cur")
+	//  while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_xxx_filter "--gid --auto --man --help")" -- "$cur")
 	//  ;;
 	writeString(buf, fmt.Sprintf(`    '%s'*)`+"\n", strings.TrimSpace(p)))
 	completions := completions(cmd)
@@ -125,12 +125,12 @@ func (b Bash) writeApp(buf io.StringWriter, cmd *kong.Node) {
 	writeString(buf, "      ;;\n")
 }
 
-func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
-	b.writeFilterFunc(buf, name)
+func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
+	b.writeFilterFunc(buf)
 
 	cmdName := commandName(cmd)
-	if name != "" {
-		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", name))
+	if b.name != "" {
+		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", b.name))
 	} else {
 		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", cmdName))
 	}
@@ -145,11 +145,11 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
 	}
 	b.writeApp(buf, cmd)
 
-	writeString(buf, `
-  esac
+	writeString(buf, `esac
+
 } &&`)
-	if name != "" {
-		writeString(buf, fmt.Sprintf("\ncomplete -F _%[1]s_completions %[1]s\n", name))
+	if b.name != "" {
+		writeString(buf, fmt.Sprintf("\ncomplete -F _%[1]s_completions %[1]s\n", b.name))
 	} else {
 		writeString(buf, fmt.Sprintf("\ncomplete -F _%[1]s_completions %[1]s\n", cmdName))
 	}
