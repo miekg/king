@@ -146,6 +146,7 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
   local compline="${compwords[*]}"
 
   case "$compline" in
+
 `)
 	if hasCommands(cmd) {
 		b.writeCommand(buf, cmd)
@@ -153,20 +154,20 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
 	for _, f := range cmd.Flags {
 		b.writeFlag(buf, f)
 	}
-	writeString(buf, `    *)`+"\n")
+	writeString(buf, "\n"+`    *)`+"\n")
 
 	if hasPositional(cmd) && len(cmd.Positional) > 1 {
-		writeString(buf, "    "+`COMP_CARG=$COMP_CWORD; for i in "${COMP_WORDS[@]}"; do [[ ${i} == -* ]] && ((COMP_CARG = COMP_CARG - 1)); done`+"\n")
-		writeString(buf, "    "+`case $COMP_CARG in`+"\n")
+		writeString(buf, "      "+`COMP_CARG=$COMP_CWORD; for i in "${COMP_WORDS[@]}"; do [[ ${i} == -* ]] && ((COMP_CARG = COMP_CARG - 1)); done`+"\n")
+		writeString(buf, "      "+`case $COMP_CARG in`+"\n")
 
 		for i, p := range cmd.Positional {
-			writeString(buf, fmt.Sprintf("\n"+`     '%d')`+"\n", i+1))
+			writeString(buf, fmt.Sprintf("\n"+`        '%d')`+"\n", i+1))
 			completions := []string{completion(p, "bash")}
-			writeString(buf, "       "+b.compReply(completions))
-			writeString(buf, "       return\n       ;;\n")
+			writeString(buf, "          "+b.compReply(completions))
+			writeString(buf, "          return\n          ;;\n")
 		}
 
-		writeString(buf, "\n    "+`esac`+"\n\n")
+		writeString(buf, "\n      "+`esac`+"\n\n")
 	}
 
 	b.writeApp(buf, cmd)
