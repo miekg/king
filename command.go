@@ -1,17 +1,23 @@
+// Package king is used to generate completions for https://github.com/alecthomas/kong.
+// Unlike most other completers this package also completes positional arguments for both Bash and Zsh.
 package king
 
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/alecthomas/kong"
 )
 
+// The Completer interface must be implemented by every shell completer. It mainly serves for documentation.
 type Completer interface {
-	Completion(*kong.Node, string)
+	// Completion generates the completion for a shell starting with k. The exename - if not empty is the name of the executable, if it
+	// is different from k.Name.
+	Completion(k *kong.Node, exename string)
+	// Out returns the generated shell completion script.
 	Out() []byte
+	// Write writes the generated shell completion script to the appropiate file, for Zsh this is _exename and for Bash this is exename.bash
 	Write() error
 }
 
@@ -54,6 +60,10 @@ func hasCommands(cmd *kong.Node) bool {
 	return false
 }
 
+// hasPositional returns true if there are positional arguments.
+func hasPositional(cmd *kong.Node) bool { return len(cmd.Positional) > 0 }
+
+// completions returns all completions that this kong.Node has.
 func completions(cmd *kong.Node) []string {
 	completions := []string{}
 	for _, c := range cmd.Children {
@@ -77,10 +87,7 @@ func completions(cmd *kong.Node) []string {
 	return completions
 }
 
-// hasPositional returns true if there are positional arguments.
-func hasPositional(cmd *kong.Node) bool { return len(cmd.Positional) > 0 }
-
-// completion returns the completion for the shell.
+// completion returns the completion for the shell for the kong.Value.
 func completion(cmd *kong.Value, shell string) string {
 	comp := cmd.Tag.Get("completion")
 	if comp == "" {
@@ -115,12 +122,7 @@ func completion(cmd *kong.Value, shell string) string {
 }
 
 // writeString writes a string into a buffer, and checks if the error is not nil.
-func writeString(b io.StringWriter, s string) {
-	if _, err := b.WriteString(s); err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
-		os.Exit(1)
-	}
-}
+func writeString(b io.StringWriter, s string) { b.WriteString(s) }
 
 func flagEnums(flag *kong.Flag) []string {
 	values := make([]string, 0)

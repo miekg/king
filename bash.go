@@ -26,6 +26,7 @@ func (b *Bash) Write() error {
 	return os.WriteFile(b.name+".bash", b.completion, 0644)
 }
 
+// Completion implements the Completer interface.
 func (b *Bash) Completion(k *kong.Node, name string) {
 	k.Flags = append(k.Flags, b.Flags...)
 	format := `# bash completion for %[1]s
