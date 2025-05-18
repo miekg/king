@@ -76,6 +76,7 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 		str.WriteString(strings.ToLower(f.Help))
 		str.WriteString(":")
 	}
+	// todo: env flags
 	values := flagEnums(f)
 	if len(values) > 0 {
 		str.WriteString("(")

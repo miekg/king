@@ -1,12 +1,5 @@
 package king
 
-import (
-	"fmt"
-	"testing"
-
-	"github.com/alecthomas/kong"
-)
-
 type T struct {
 	Do   T1 `cmd:"" aliases:"d" help:"do it"`
 	More T1 `cmd:"" aliases:"m" help:"do it again"`
@@ -30,19 +23,3 @@ type (
 	T3 struct{}
 	T4 struct{}
 )
-
-func TestCommands(t *testing.T) {
-	parser := kong.Must(&T{})
-	cmds := commands(parser.Model.Node)
-	for i := range cmds {
-		println(cmds[i])
-	}
-}
-
-func TestNodeForCommand(t *testing.T) {
-	parser := kong.Must(&T{})
-	node := nodeForCommand(parser.Model.Node, "do")
-	fmt.Printf("%v\n", node)
-	node = nodeForCommand(parser.Model.Node, "bla")
-	fmt.Printf("%v\n", node)
-}

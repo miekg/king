@@ -3,9 +3,7 @@ package king
 import (
 	"fmt"
 	"io"
-	"maps"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -55,6 +53,7 @@ func hasCommands(cmd *kong.Node) bool {
 	return false
 }
 
+/*
 // commands returns all possible paths through the (sub)command structure of the kong.Node.
 func commands(node *kong.Node) []string {
 	if node == nil {
@@ -126,6 +125,27 @@ func nodeForCommand(cmd *kong.Node, trace string) *kong.Node {
 	fields := strings.Fields(trace)
 	leaf := dfs(cmd, fields)
 	return leaf
+}
+*/
+
+func completions(cmd *kong.Node) []string {
+	completions := []string{}
+	for _, c := range cmd.Children {
+		if c.Hidden {
+			continue
+		}
+		completions = append(completions, c.Name)
+	}
+	for _, f := range cmd.Flags {
+		if f.Hidden {
+			continue
+		}
+		completions = append(completions, "--"+f.Name)
+		if f.Short != 0 {
+			completions = append(completions, "-"+fmt.Sprintf("%c", f.Short))
+		}
+	}
+	return completions
 }
 
 // hasPositional returns true if there are positional arguments.

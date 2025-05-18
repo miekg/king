@@ -63,32 +63,66 @@ func (b Bash) writeFilterFunc(buf io.StringWriter, name string) {
 	writeString(buf, fmt.Sprintf(format, name))
 }
 
-func (b Bash) writeFlags(buf io.StringWriter, cmd *kong.Node) {
-	for i, f := range cmd.Flags {
-		if f.Hidden {
-			continue
-		}
-		writeString(buf, "--"+f.Name)
-		if f.Short != 0 {
-			writeString(buf, fmt.Sprintf("-%c", f.Short))
-		}
-		if i < len(cmd.Flags)-1 {
-			writeString(buf, " ")
-		}
+func (b Bash) compReply(completions []string) string {
+	format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "%s")" -- "$cur")` + "\n"
+	return fmt.Sprintf(format, strings.Join(completions, " "))
+}
+
+func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string) {
+	if flag.Hidden {
+		return
+	}
+	p := ""
+	if len(parents) > 0 {
+		p = parents[0] + " "
+	}
+	// 'user add'*'--backup-backend')
+	//   while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "s3")" -- "$cur")
+	//   ;;
+	completions := []string{"MAKEN"}
+	writeString(buf, fmt.Sprintf(`    '%s'*'--%s')`+"\n", strings.TrimSpace(p), flag.Name))
+	writeString(buf, "      "+b.compReply(completions))
+	writeString(buf, "      ;;\n")
+	if flag.Short != 0 {
+		writeString(buf, fmt.Sprintf(`    '%s'*'-%c')`+"\n", strings.TrimSpace(p), flag.Short))
+		writeString(buf, "      "+b.compReply(completions))
+		writeString(buf, "      ;;\n")
 	}
 }
 
-func (b Bash) writeCommands(buf io.StringWriter, cmd *kong.Node) {
-	// get a list of all commands possible with the longest chains first, so the case works.
-	cmds := commands(cmd)
-	// now for each cmd, we also need to find the last node there so get the flags.
-	for _, n := range cmds {
-		println("N", n)
-		writeString(buf, fmt.Sprintf(`    '%s'*)`+"\n", n))
-		if leaf := nodeForCommand(cmd, n); leaf != nil {
-			b.writeFlags(buf, leaf)
-		}
+// writeCommand writes a completion case statement. The optional parent is used to create the correct matching
+// for sub-sub comments
+func (b Bash) writeCommand(buf io.StringWriter, cmd *kong.Node, parents ...string) {
+	p := ""
+	if len(parents) > 0 {
+		p = parents[0] + " "
 	}
+	if cmd.Type == kong.ApplicationNode {
+		for _, c := range cmd.Children {
+			b.writeCommand(buf, c, p+c.Name)
+		}
+		return
+	}
+	//'group add'*)
+	//  while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_c_completions_filter "--gid --auto --man --help")" -- "$cur")
+	//  ;;
+	writeString(buf, fmt.Sprintf(`    '%s'*)`+"\n", strings.TrimSpace(p)))
+	completions := completions(cmd)
+	writeString(buf, "      "+b.compReply(completions))
+	writeString(buf, "      ;;\n")
+	for _, f := range cmd.Flags {
+		b.writeFlag(buf, f, p)
+	}
+	for _, c := range cmd.Children {
+		b.writeCommand(buf, c, p+c.Name)
+	}
+}
+
+func (b Bash) writeApp(buf io.StringWriter, cmd *kong.Node) {
+	writeString(buf, `    *)`+"\n")
+	completions := completions(cmd)
+	writeString(buf, "      "+b.compReply(completions))
+	writeString(buf, "      ;;\n")
 }
 
 func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
@@ -96,9 +130,9 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
 
 	cmdName := commandName(cmd)
 	if name != "" {
-		writeString(buf, fmt.Sprintf("_%s_completions() {\n", name))
+		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", name))
 	} else {
-		writeString(buf, fmt.Sprintf("_%s_completions() {\n", cmdName))
+		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", cmdName))
 	}
 	writeString(buf, `  local cur=${COMP_WORDS[COMP_CWORD]}
   local compwords=("${COMP_WORDS[@]:1:$COMP_CWORD-1}")
@@ -107,6 +141,16 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node, name string) {
   case "$compline" in
 `)
 	if hasCommands(cmd) {
-		b.writeCommands(buf, cmd)
+		b.writeCommand(buf, cmd)
+	}
+	b.writeApp(buf, cmd)
+
+	writeString(buf, `
+  esac
+} &&`)
+	if name != "" {
+		writeString(buf, fmt.Sprintf("\ncomplete -F _%[1]s_completions %[1]s\n", name))
+	} else {
+		writeString(buf, fmt.Sprintf("\ncomplete -F _%[1]s_completions %[1]s\n", cmdName))
 	}
 }
