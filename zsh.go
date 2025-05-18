@@ -9,14 +9,16 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-// Zsh is used to create completions for the Zsh shell.
+// Zsh is a zsh completion generator.
 type Zsh struct {
 	k          *kong.Node
 	name       string
 	completion []byte
 }
 
-// Write writes the completion in z to the file "_" + k.Model.Name.
+func (z *Zsh) Out() []byte { return z.completion }
+
+// Write writes the completion in z to the file "_" + z.name.
 func (z *Zsh) Write() error {
 	if z.k == nil {
 		return fmt.Errorf("no kong node")
@@ -38,10 +40,10 @@ compdef _%[1]s %[1]s
 `
 	var out strings.Builder
 	fmt.Fprintf(&out, format, name)
-	z.gen(&out, k, name)
+	z.name = name
+	z.gen(&out, k)
 	z.completion = []byte(out.String())
 	z.k = k
-	z.name = name
 }
 
 func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
@@ -74,6 +76,7 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 		str.WriteString(strings.ToLower(f.Help))
 		str.WriteString(":")
 	}
+	// todo: env flags
 	values := flagEnums(f)
 	if len(values) > 0 {
 		str.WriteString("(")
@@ -137,17 +140,18 @@ func (z Zsh) writeCommands(buf io.StringWriter, cmd *kong.Node) {
 	}
 }
 
-func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node, name string) {
+func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node) {
 	for _, c := range cmd.Children {
 		if c == nil || c.Hidden {
 			continue
 		}
-		z.gen(buf, c, "")
+		z.name = ""
+		z.gen(buf, c)
 	}
 	cmdName := commandName(cmd)
 
-	if name != "" {
-		writeString(buf, fmt.Sprintf("_%s() {\n", name))
+	if z.name != "" {
+		writeString(buf, fmt.Sprintf("_%s() {\n", z.name))
 	} else {
 		writeString(buf, fmt.Sprintf("_%s() {\n", cmdName))
 	}
