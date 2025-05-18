@@ -17,10 +17,7 @@ Any struct field can have an extra tag:
 I use [Zsh](https://zsh.org), so this is where my initial focus is. The
 [Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
-## TODO
-
-- Bash short options and aliases.
-- Env flag from Kong
+Run the tests to see example files being created.
 
 ## Supported "actions"
 
