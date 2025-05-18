@@ -11,18 +11,15 @@ import (
 
 // Zsh is a zsh completion generator.
 type Zsh struct {
-	k          *kong.Node
 	name       string
 	completion []byte
+	Flags      []*kong.Flag // Any global flags that the should Application Node have.
 }
 
 func (z *Zsh) Out() []byte { return z.completion }
 
 // Write writes the completion in z to the file "_" + z.name.
 func (z *Zsh) Write() error {
-	if z.k == nil {
-		return fmt.Errorf("no kong node")
-	}
 	if z.completion == nil {
 		return fmt.Errorf("no completion")
 	}
@@ -32,6 +29,8 @@ func (z *Zsh) Write() error {
 // Completion generates a zsh compatible completion. The name is used as the name of the command for which
 // the completion should be generated, usually this can be just kong.Model.Name.
 func (z *Zsh) Completion(k *kong.Node, name string) {
+	k.Flags = append(k.Flags, z.Flags...)
+
 	format := `#compdef %[1]s
 compdef _%[1]s %[1]s
 # zsh completion for %[1]s
@@ -41,9 +40,9 @@ compdef _%[1]s %[1]s
 	var out strings.Builder
 	fmt.Fprintf(&out, format, name)
 	z.name = name
+	k.Name = name
 	z.gen(&out, k)
 	z.completion = []byte(out.String())
-	z.k = k
 }
 
 func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {

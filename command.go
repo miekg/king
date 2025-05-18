@@ -26,7 +26,8 @@ func commandName(n *kong.Node) (out string) {
 	for root.Parent != nil {
 		root = root.Parent
 	}
-	return strings.Replace(root.Name+identifier(n), ".", "_", -1)
+	out = strings.Replace(root.Name+identifier(n), ".", "_", -1)
+	return strings.Replace(out, "-", "_", -1)
 }
 
 // identifier creates a name suitable for using as an identifier in shell code.

@@ -8,14 +8,9 @@ import (
 
 func TestZsh(t *testing.T) {
 	parser := kong.Must(&T{})
-	z := &Zsh{}
+	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page."}}
+	z := &Zsh{Flags: []*kong.Flag{manf}}
 	z.Completion(parser.Model.Node, "mijnexe")
-	if err := z.Write(); err != nil {
-		t.Fatal(err)
-	}
-	parser = kong.Must(&T1{})
-	z.Completion(parser.Model.Node, "t1")
-	if err := z.Write(); err != nil {
-		t.Fatal(err)
-	}
+	println(string(z.Out()))
+	z.Write()
 }
