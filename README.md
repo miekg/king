@@ -19,6 +19,11 @@ Any struct field can have 2 extra tags:
 I use [zsh](https://zsh.org), so this is where my initial focus is. The
 [bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
+## TODO
+
+- Global options, have a way to add them.
+- Bash options, env options also for zsh
+
 ## Supported "actions"
 
 The following actions are supported:

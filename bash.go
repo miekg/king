@@ -119,6 +119,9 @@ func (b Bash) writeCommand(buf io.StringWriter, cmd *kong.Node, parents ...strin
 }
 
 func (b Bash) writeApp(buf io.StringWriter, cmd *kong.Node) {
+	for _, f := range cmd.Flags {
+		b.writeFlag(buf, f)
+	}
 	writeString(buf, `    *)`+"\n")
 	completions := completions(cmd)
 	writeString(buf, "      "+b.compReply(completions))
