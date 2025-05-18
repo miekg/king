@@ -26,8 +26,7 @@ func (z *Zsh) Write() error {
 	return os.WriteFile("_"+z.name, z.completion, 0644)
 }
 
-// Completion generates a zsh compatible completion. The name is used as the name of the command for which
-// the completion should be generated, usually this can be just kong.Model.Name.
+// Completion implements the Completer interface.
 func (z *Zsh) Completion(k *kong.Node, name string) {
 	k.Flags = append(k.Flags, z.Flags...)
 

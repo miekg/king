@@ -14,8 +14,8 @@ Any struct field can have an extra tag:
   `<` and `>` which should be a Bash action as specified in the `complete` function in bash(1), like `<file>`
   or `<directory>`. These are translated to things Zsh understands.
 
-I use [zsh](https://zsh.org), so this is where my initial focus is. The
-[bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
+I use [Zsh](https://zsh.org), so this is where my initial focus is. The
+[Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
 ## TODO
 

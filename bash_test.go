@@ -11,7 +11,6 @@ func TestBash(t *testing.T) {
 	b := &Bash{}
 	b.Completion(parser.Model.Node, "mijnexe")
 	b.Write()
-	println(string(b.Out()))
 }
 
 func TestBashServerCh(t *testing.T) {
@@ -31,6 +30,5 @@ func TestBashServerCh(t *testing.T) {
 	b := &Bash{}
 	parser := kong.Must(&ServerCh{})
 	b.Completion(parser.Model.Node, "ChVolumeServer")
-	println(string(b.Out()))
 	b.Write()
 }
