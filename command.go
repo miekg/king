@@ -26,7 +26,8 @@ func commandName(n *kong.Node) (out string) {
 	for root.Parent != nil {
 		root = root.Parent
 	}
-	return strings.Replace(root.Name+identifier(n), ".", "_", -1)
+	out = strings.Replace(root.Name+identifier(n), ".", "_", -1)
+	return strings.Replace(out, "-", "_", -1)
 }
 
 // identifier creates a name suitable for using as an identifier in shell code.
@@ -70,6 +71,9 @@ func completions(cmd *kong.Node) []string {
 			completions = append(completions, "-"+fmt.Sprintf("%c", f.Short))
 		}
 	}
+	for _, p := range cmd.Positional {
+		completions = append(completions, completion(p, "bash"))
+	}
 	return completions
 }
 
@@ -107,16 +111,7 @@ func completion(cmd *kong.Value, shell string) string {
 			return comp
 		}
 	}
-	return comp
-}
-
-// compname returns the compname, if there is no compname, cmd.Name is returned.
-func compname(cmd *kong.Value) string {
-	compname := cmd.Tag.Get("compname")
-	if compname == "" {
-		return cmd.Name
-	}
-	return compname
+	return "$(" + comp + ")"
 }
 
 // writeString writes a string into a buffer, and checks if the error is not nil.

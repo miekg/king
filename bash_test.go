@@ -25,10 +25,12 @@ func TestBashServerCh(t *testing.T) {
 		Status        *string `enum:"ok,setup,dfs,rm," help:"Set the server's status to *STATUS*."`
 		Comment       *string `help:"Set a comment. Use the empty string to remove a comment."`
 		Owner         *string `help:"Set an owner, this is a free-form string, see ListVolumeServers(1) for a current list."`
-		Server        string  `arg:"" placeholder:"server|ID" help:"Server to change." completion:"c volume-server list --comp" type:"existingvolumeserver"`
+		Server        string  `arg:"" placeholder:"server|ID" help:"Server to change." completion:"echo volume-server list --comp" type:"existingvolumeserver"`
+		Server2       string  `arg:"" placeholder:"server|ID" help:"Server to change." completion:"echo volume-server list --comp" type:"existingvolumeserver"`
 	}
 	b := &Bash{}
 	parser := kong.Must(&ServerCh{})
 	b.Completion(parser.Model.Node, "ChVolumeServer")
 	println(string(b.Out()))
+	b.Write()
 }
