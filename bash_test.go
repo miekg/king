@@ -31,4 +31,5 @@ func TestBashServerCh(t *testing.T) {
 	parser := kong.Must(&ServerCh{})
 	b.Completion(parser.Model.Node, "ChVolumeServer")
 	println(string(b.Out()))
+	b.Write()
 }

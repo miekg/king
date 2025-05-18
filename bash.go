@@ -79,7 +79,11 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 	// 'user add'*'--backup-backend')
 	//   while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_xxx_filter "s3")" -- "$cur")
 	//   ;;
-	completions := []string{"MAKEN"}
+	enums := flagEnums(flag)
+	if len(enums) == 0 { // nothing to complete
+		return
+	}
+	completions := enums
 	writeString(buf, fmt.Sprintf(`    '%s'*'--%s')`+"\n", strings.TrimSpace(p), flag.Name))
 	writeString(buf, "      "+b.compReply(completions))
 	writeString(buf, "      ;;\n")
