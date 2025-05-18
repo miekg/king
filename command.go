@@ -70,6 +70,9 @@ func completions(cmd *kong.Node) []string {
 			completions = append(completions, "-"+fmt.Sprintf("%c", f.Short))
 		}
 	}
+	for _, p := range cmd.Positional {
+		completions = append(completions, completion(p, "bash"))
+	}
 	return completions
 }
 
@@ -107,7 +110,7 @@ func completion(cmd *kong.Value, shell string) string {
 			return comp
 		}
 	}
-	return comp
+	return "$(" + comp + ")"
 }
 
 // compname returns the compname, if there is no compname, cmd.Name is returned.
