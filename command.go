@@ -114,15 +114,6 @@ func completion(cmd *kong.Value, shell string) string {
 	return "$(" + comp + ")"
 }
 
-// compname returns the compname, if there is no compname, cmd.Name is returned.
-func compname(cmd *kong.Value) string {
-	compname := cmd.Tag.Get("compname")
-	if compname == "" {
-		return cmd.Name
-	}
-	return compname
-}
-
 // writeString writes a string into a buffer, and checks if the error is not nil.
 func writeString(b io.StringWriter, s string) {
 	if _, err := b.WriteString(s); err != nil {

@@ -12,17 +12,14 @@ Any struct field can have 2 extra tags:
 - `completion:""` which contains a shell command that should be used for completion _or_ a string between
   `<` and `>` which should be a bash action as specified in the complete function in bash(1), like `<file>`
   or `<directory>`.
-- `compname:""` not needed often, but this is displayed by (only?) zsh on what type of completion is being
-  performed. I.e. it could be "users" when the completion is trying to find users. If not given it the name of
-  kong.Node is used (usually the field name in the struct).
 
 I use [zsh](https://zsh.org), so this is where my initial focus is. The
 [bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
 ## TODO
 
-- Global options, have a way to add them.
-- Bash options, env options also for zsh
+- Bash short options
+- Env type options from Kong
 
 ## Supported "actions"
 
