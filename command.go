@@ -133,3 +133,13 @@ func flagEnums(flag *kong.Flag) []string {
 	}
 	return values
 }
+
+func flagEnvs(flag *kong.Flag) []string {
+	values := make([]string, 0)
+	for _, env := range flag.Envs {
+		if strings.TrimSpace(env) != "" {
+			values = append(values, env)
+		}
+	}
+	return values
+}
