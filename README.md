@@ -17,6 +17,20 @@ Any struct field can have an extra tag:
 I use [Zsh](https://zsh.org), so this is where my initial focus is. The
 [Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
+Extra flags can be injected:
+
+```go
+fl := &kong.Flag{
+   Value: &kong.Value{
+       Name: "man",
+       Help: "Show context-sensitive manual page.",
+       Tag:  &kong.Tag{},
+   },
+}
+```
+
+And then assign it the to `Flags` in Zsh or Bash.
+
 Run the tests to see example files being created.
 
 ## Supported "actions"
