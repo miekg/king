@@ -85,6 +85,12 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 	if comp := completion(flag.Value, "bash"); comp != "" {
 		completions = []string{comp}
 	}
+	if envs := flagEnvs(flag); len(envs) > 0 {
+		for i := range envs {
+			envs[i] = "$" + envs[i]
+		}
+		completions = envs
+	}
 
 	if len(completions) == 0 { // nothing to complete
 		return
