@@ -22,6 +22,7 @@ func compTest(t *testing.T, completionfile, exe string) []byte {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.Remove("comptest.zsh")
 	os.Chmod("comptest.zsh", 0o755)
 	cmd := exec.Command("zsh", "./comptest.zsh")
 	out, err := cmd.Output()
@@ -38,12 +39,13 @@ func TestZsh(t *testing.T) {
 	z.Completion(parser.Model.Node, "myexe")
 	z.Write()
 
-	tests := []struct{
-		exe string
+	tests := []struct {
+		exe    string
 		expect string
-	} {
-		{ "myexe --", "--help\r\n--man"},
-		{ "myexe --m", "--man"},
+	}{
+		{"myexe --", "--help\r\n--man"},
+		{"myexe --m", "--man"},
+		{"myexe ", "d\r\ndo\r\nm\r\nmore\r\ne\r\neven-more"},
 	}
 
 	for i := range tests {
