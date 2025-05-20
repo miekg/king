@@ -1,8 +1,13 @@
 #!/bin/zsh
 
+# Call as: ./comptest.zsh _completion 'command'
+compfile=$1
+shift
+exe="$@"
+
 autoload -Uz compinit
 compinit
-source _mijnexe
+source "$compfile"
 
 # Define our test function.
 comptest () {
@@ -47,7 +52,7 @@ zmodload zsh/zpty  # Load the pseudo terminal module.
 zpty {,}comptest   # Create a new pty and run our function in it.
 
 # Simulate a command being typed, ending with TAB to get completions.
-zpty -w comptest $'./mijnexe -\t'
+zpty -w comptest $'mijnexe -\t'
 
 # Read up to the first delimiter. Discard all of this.
 zpty -r comptest REPLY $'*\C-B'
