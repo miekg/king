@@ -12,8 +12,8 @@ import (
 
 // The Completer interface must be implemented by every shell completer. It mainly serves for documentation.
 type Completer interface {
-	// Completion generates the completion for a shell starting with k. The exename - if not empty is the name of the executable, if it
-	// is different from k.Name.
+	// Completion generates the completion for a shell starting with k. The exename - if not empty - takes
+	// precedence over k.Name.
 	Completion(k *kong.Node, exename string)
 	// Out returns the generated shell completion script.
 	Out() []byte
