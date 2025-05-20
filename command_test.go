@@ -20,6 +20,8 @@ type T1 struct {
 }
 
 type T2 struct {
+	Status *string `enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
+
 	DoEvenMore   T3 `cmd:""`
 	WhatEvenMore T4 `cmd:""`
 }
