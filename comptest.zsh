@@ -52,6 +52,8 @@ zmodload zsh/zpty  # Load the pseudo terminal module.
 zpty {,}comptest   # Create a new pty and run our function in it.
 
 # Simulate a command being typed, ending with TAB to get completions.
+# TODO(miek): for the love of God I cannot find a way to insert a variable in this syntax below, hence
+# generating this.
 zpty -w comptest $'mijnexe -\t'
 
 # Read up to the first delimiter. Discard all of this.
