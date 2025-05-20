@@ -18,7 +18,6 @@ type Bash struct {
 
 func (b *Bash) Out() []byte { return b.completion }
 
-// Write writes the completion to file b.name".bash".
 func (b *Bash) Write() error {
 	if b.completion == nil {
 		return fmt.Errorf("no completion")
@@ -26,7 +25,6 @@ func (b *Bash) Write() error {
 	return os.WriteFile(b.name+".bash", b.completion, 0644)
 }
 
-// Completion implements the Completer interface.
 func (b *Bash) Completion(k *kong.Node, name string) {
 	k.Flags = append(k.Flags, b.Flags...)
 	format := `# bash completion for %[1]s

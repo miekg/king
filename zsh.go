@@ -18,7 +18,6 @@ type Zsh struct {
 
 func (z *Zsh) Out() []byte { return z.completion }
 
-// Write writes the completion in z to the file "_" + z.name.
 func (z *Zsh) Write() error {
 	if z.completion == nil {
 		return fmt.Errorf("no completion")
@@ -26,7 +25,6 @@ func (z *Zsh) Write() error {
 	return os.WriteFile("_"+z.name, z.completion, 0644)
 }
 
-// Completion implements the Completer interface.
 func (z *Zsh) Completion(k *kong.Node, name string) {
 	k.Flags = append(k.Flags, z.Flags...)
 

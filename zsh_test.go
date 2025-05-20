@@ -8,9 +8,9 @@ import (
 
 func TestZsh(t *testing.T) {
 	parser := kong.Must(&T{})
-	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page."}}
+	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page.", Tag: &kong.Tag{}}}
 	z := &Zsh{Flags: []*kong.Flag{manf}}
-	z.Completion(parser.Model.Node, "mijnexe")
+	z.Completion(parser.Model.Node, "myexe")
 	z.Write()
 }
 
