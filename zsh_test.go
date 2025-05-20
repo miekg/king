@@ -10,7 +10,7 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-func compTest(t *testing.T, completionfile, exe string) []byte {
+func compzTest(t *testing.T, completionfile, exe string) []byte {
 	tmpl, err := template.New("comptest.zsh.tmpl").ParseFiles("comptest.zsh.tmpl")
 	if err != nil {
 		panic(err)
@@ -49,7 +49,7 @@ func TestZsh(t *testing.T) {
 	}
 
 	for i := range tests {
-		out := compTest(t, "_myexe", tests[i].exe)
+		out := compzTest(t, "_myexe", tests[i].exe)
 		if string(out) != tests[i].expect {
 			t.Errorf("test %d, expected %q, got %q", i, tests[i].expect, string(out))
 		}
