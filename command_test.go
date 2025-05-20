@@ -1,5 +1,10 @@
 package king
 
+type CompTest struct {
+	Compfile string
+	Comptest string
+}
+
 type T struct {
 	Do   T1 `cmd:"" aliases:"d" help:"do it"`
 	More T1 `cmd:"" aliases:"m" help:"do it again"`
