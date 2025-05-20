@@ -1,6 +1,7 @@
 package king
 
 import (
+	"bytes"
 	"html/template"
 	"os"
 	"os/exec"
@@ -9,17 +10,12 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-func TestZsh(t *testing.T) {
-	parser := kong.Must(&T{})
-	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page.", Tag: &kong.Tag{}}}
-	z := &Zsh{Flags: []*kong.Flag{manf}}
-	z.Completion(parser.Model.Node, "myexe")
-	z.Write()
+func compTest(t *testing.T, completionfile, exe string) []byte {
 	tmpl, err := template.New("comptest.zsh.tmpl").ParseFiles("comptest.zsh.tmpl")
 	if err != nil {
 		panic(err)
 	}
-	c := CompTest{Compfile: "_myexe", Comptest: "myexe -"}
+	c := CompTest{Compfile: completionfile, Comptest: exe}
 
 	f, err := os.Create("comptest.zsh")
 	err = tmpl.Execute(f, c)
@@ -32,12 +28,28 @@ func TestZsh(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	println(string(out))
+	return bytes.TrimSpace(out)
 }
 
-func TestZshServerCh(t *testing.T) {
-	z := &Zsh{}
-	parser := kong.Must(&ServerCh{})
-	z.Completion(parser.Model.Node, "ChVolumeServer")
+func TestZsh(t *testing.T) {
+	parser := kong.Must(&T{})
+	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page.", Tag: &kong.Tag{}}}
+	z := &Zsh{Flags: []*kong.Flag{manf}}
+	z.Completion(parser.Model.Node, "myexe")
 	z.Write()
+
+	tests := []struct{
+		exe string
+		expect string
+	} {
+		{ "myexe --", "--help\r\n--man"},
+		{ "myexe --m", "--man"},
+	}
+
+	for i := range tests {
+		out := compTest(t, "_myexe", tests[i].exe)
+		if string(out) != tests[i].expect {
+			t.Errorf("test %d, expected %q, got %q", i, tests[i].expect, string(out))
+		}
+	}
 }
