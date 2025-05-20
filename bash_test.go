@@ -9,6 +9,6 @@ import (
 func TestBash(t *testing.T) {
 	parser := kong.Must(&T{})
 	b := &Bash{}
-	b.Completion(parser.Model.Node, "mijnexe")
+	b.Completion(parser.Model.Node, "myexe")
 	b.Write()
 }
