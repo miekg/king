@@ -66,12 +66,12 @@ func nam(k, cmd *kong.Node) string {
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
 }
 
-// synopsis implements the synopsis func name.
-func synopsis(k, cmd *kong.Node) string {
+// options implements the options func name.
+func options(k, cmd *kong.Node) string {
 	s := &strings.Builder{}
 	flags := cmd.Flags
 
-	if len(flags) > 1 {
+	if len(flags) > 0 {
 
 		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
 		fmt.Fprintf(s, "### Options\n\n")
@@ -79,7 +79,7 @@ func synopsis(k, cmd *kong.Node) string {
 		// groups holds any grouped options
 		groups := map[string][]*kong.Flag{}
 		for _, f := range flags {
-			if f.Group.Key != "" {
+			if f.Group != nil {
 				groups[f.Group.Key] = append(groups[f.Group.Key], f)
 			}
 		}
@@ -142,10 +142,10 @@ func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 	funcMap := template.FuncMap{
 		"name":        func() string { return nam(k, cmd) },
 		"description": func() string { return cmd.Tag.Get("description") },
-		"synopsis":    func() string { return synopsis(k, cmd) },
+		"synopsis":    func() string { return "" },
 		"arguments":   func() string { return "" },
 		// commands?
-		"options": func() string { return "" },
+		"options": func() string { return options(k, cmd) },
 		"globals": func() string { return "" },
 	}
 
