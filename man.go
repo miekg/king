@@ -116,13 +116,20 @@ func synopsis(k, cmd *kong.Node) string {
 	return s.String()
 }
 
+func arguments(k, cmd *kong.Node) string {
+	s := &strings.Builder{}
+	for _, p := range cmd.Positional {
+		formatArg(s, p)
+	}
+	return s.String()
+}
+
 // options implements the options func name.
 func options(k, cmd *kong.Node) string {
 	s := &strings.Builder{}
 	flags := cmd.Flags
 
 	if len(flags) > 0 {
-
 		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
 		fmt.Fprintf(s, "### Options\n\n")
 
@@ -194,16 +201,12 @@ func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 		log.Printf("Failed to generate manual page: %q not found as child", field)
 		return
 	}
-	fmt.Printf("%+v\n", cmd)
-	for _, c := range cmd.Children {
-		println(c.Name)
-	}
 
 	funcMap := template.FuncMap{
 		"name":        func() string { return nam(k, cmd) },
 		"description": func() string { return cmd.Tag.Get("description") },
 		"synopsis":    func() string { return synopsis(k, cmd) },
-		"arguments":   func() string { return "" },
+		"arguments":   func() string { return arguments(k, cmd) },
 		// commands?
 		"options": func() string { return options(k, cmd) },
 		"globals": func() string { return globals(m.Flags) },

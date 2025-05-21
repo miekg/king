@@ -134,3 +134,46 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	fmt.Fprintln(s)
 	fmt.Fprintln(s)
 }
+
+func formatArg(s io.Writer, p *kong.Positional) {
+	name := p.Name
+	if p.Tag.PlaceHolder != "" {
+		name = p.Tag.PlaceHolder
+	}
+	// required opts....
+	fmt.Fprintf(s, "`%s`", strings.ToUpper(name))
+	if p.Tag.Short != 0 {
+		fmt.Fprintf(s, ", `-%c`", p.Tag.Short)
+	}
+	fmt.Fprintln(s)
+	fmt.Fprintf(s, ":   %s", p.Help)
+	if !p.Required {
+		fmt.Fprintf(s, " This argument is optional.")
+	}
+	if p.Enum != "" {
+		fmt.Fprintf(s, " Valid values are: ")
+		enums := p.EnumSlice()
+		switch len(p.EnumSlice()) {
+		case 1:
+			fmt.Fprintf(s, "%q.", enums[0])
+		case 2:
+			fmt.Fprintf(s, "%q or %q.", enums[0], enums[1])
+		default:
+			div := ", "
+			for i, e := range enums {
+				if i == len(enums)-2 {
+					div = " or "
+				}
+				if i == len(enums)-1 {
+					div = "."
+				}
+				fmt.Fprintf(s, "%q%s", e, div)
+			}
+		}
+	}
+	if p.Default != "" {
+		fmt.Fprintf(s, " The default is %q.", p.Default)
+	}
+
+	fmt.Fprintln(s)
+}
