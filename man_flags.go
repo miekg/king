@@ -177,3 +177,7 @@ func formatArg(s io.Writer, p *kong.Positional) {
 
 	fmt.Fprintln(s)
 }
+
+func formatCmd(s io.Writer, cmd *kong.Command) {
+	fmt.Fprintf(s, "%+v\n", cmd)
+}

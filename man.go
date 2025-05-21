@@ -32,7 +32,8 @@ type Man struct {
 //   - synopsis: shows the argument and options. If the node has aliases they are shown here as well.
 //   - description: the description of the command's function. The node (non-Kong) "description" tag is used for
 //     this.
-//   - arguments: a rundown of each of the commands and/or arguments this command has.
+//   - commands: a rundown of each of the commands this command has.
+//   - arguments: a rundown of each of the arguments this command has.
 //   - options: a list documenting each of the options.
 //   - globals: any global flags, from m.Flags.
 const ManTemplate = `{{name -}}
@@ -40,6 +41,8 @@ const ManTemplate = `{{name -}}
 {{synopsis -}}
 
 {{description -}}
+
+{{commands -}}
 
 {{arguments -}}
 
@@ -120,6 +123,16 @@ func arguments(k, cmd *kong.Node) string {
 	s := &strings.Builder{}
 	for _, p := range cmd.Positional {
 		formatArg(s, p)
+	}
+	return s.String()
+}
+
+func commands(k, cmd *kong.Node) string {
+	s := &strings.Builder{}
+	for _, c := range cmd.Children {
+		if c.Type == kong.CommandNode {
+			formatCmd(s, c)
+		}
 	}
 	return s.String()
 }
@@ -207,9 +220,9 @@ func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 		"description": func() string { return cmd.Tag.Get("description") },
 		"synopsis":    func() string { return synopsis(k, cmd) },
 		"arguments":   func() string { return arguments(k, cmd) },
-		// commands?
-		"options": func() string { return options(k, cmd) },
-		"globals": func() string { return globals(m.Flags) },
+		"commands":    func() string { return commands(k, cmd) },
+		"options":     func() string { return options(k, cmd) },
+		"globals":     func() string { return globals(m.Flags) },
 	}
 
 	if m.Template == "" {
