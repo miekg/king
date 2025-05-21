@@ -22,36 +22,16 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	if f.Short != 0 {
 		fmt.Fprintf(s, ", `-%c`", f.Short)
 	}
-	// TODO(miek): probably even more types then are now here.
-	// TODO(miek): entire rework this; what does it even attempt? And how can we make this do the right thing
-	// for custom types.
-	switch f.Target.Kind().String() {
-	case "Size", "slice", "string", "int", "uint", "uint8", "uint16", "uint32", "uint64":
-		// if the type:counter is set, this option can be repeated, and cannot have a value
-		if f.Tag.Get("type") == "counter" {
-			break
-		}
-		if f.PlaceHolder != "" {
-			fmt.Fprintf(s, " *%s*", strings.ToUpper(f.PlaceHolder))
-			break
-		}
-		fmt.Fprintf(s, " *%s*", strings.TrimPrefix(strings.ToUpper(f.Name), "--"))
-	case "Time":
-		if f.Format != "" {
-			// convert time Format modifiers back into something more sane.
-			f.Format = strings.Replace(f.Format, "2006", "yyyy", 1)
-			f.Format = strings.Replace(f.Format, "01", "mm", 1)
-			f.Format = strings.Replace(f.Format, "02", "dd", 1)
-			f.Format = strings.Replace(f.Format, "15", "hh", 1)
-			f.Format = strings.Replace(f.Format, "04", "mm", 1) // clashes with month, but we uppercase this ....
 
-			fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Format))
-			break
-		}
-		fmt.Fprintf(s, " *%s*", strings.TrimPrefix(strings.ToUpper(f.Name), "--"))
-	case "Date":
-		fmt.Fprintf(s, " *%s*", "YYYY-MM-DD|[+-]Y")
+	switch {
+	case f.Tag.Get("type") == "counter":
+
+	case f.PlaceHolder != "":
+		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.PlaceHolder))
+	case f.PlaceHolder == "":
+		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
 	}
+
 	fmt.Fprintln(s)
 	deprecated := ""
 	if f.Tag.Has("deprecated") {
@@ -64,6 +44,10 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	if f.Tag.Get("type") == "counter" {
 		fmt.Fprintf(s, " This option can be repeated.")
 	}
+	if f.Format != "" {
+		fmt.Fprintf(s, " This must be formatted according to %q.", f.Format)
+	}
+
 	if f.Enum != "" {
 		enums := f.EnumSlice()
 		switch len(enums) {

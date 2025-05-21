@@ -12,6 +12,11 @@ import (
 	"text/template"
 
 	"github.com/alecthomas/kong"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/ast"
+	"github.com/gomarkdown/markdown/parser"
+	"github.com/mmarkdown/mmark/v2/mparser"
+	"github.com/mmarkdown/mmark/v2/render/man"
 )
 
 // Man is a manual page generator.
@@ -59,8 +64,15 @@ func (m *Man) Write() error {
 	if m.manual == nil {
 		return fmt.Errorf("no manual")
 	}
-	// convert to manpage.
-	return os.WriteFile(fmt.Sprintf("%s.%d", m.name, m.Section), m.manual, 0644)
+	p := parser.NewWithExtensions(parser.FencedCode | parser.DefinitionLists | parser.Tables)
+	p.Opts = parser.Options{
+		ParserHook: func(data []byte) (ast.Node, []byte, int) { return mparser.Hook(data) },
+		Flags:      parser.FlagsNone,
+	}
+	doc := markdown.Parse(m.manual, p)
+	renderer := man.NewRenderer(man.RendererOptions{})
+	md := markdown.Render(doc, renderer)
+	return os.WriteFile(fmt.Sprintf("%s.%d", m.name, m.Section), md, 0644)
 }
 
 // Manual generates a manual page for field named field of the node.
@@ -77,7 +89,6 @@ func (m *Man) Write() error {
 //
 // If field is empty, the manual page for k is returned.
 func (m *Man) Manual(k *kong.Node, parent, field string) {
-	fmt.Printf("%+v\n", k)
 	cmd := k
 	for _, c := range k.Children {
 		if c.Name == field {
@@ -88,7 +99,7 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 	if parent != "" {
 		k.Name = parent
 	}
-	m.name = k.Name
+	m.name = cmd.Tag.Get("cmd")
 
 	if cmd == nil && field != "" {
 		log.Printf("Failed to generate manual page: %q not found as child", field)
@@ -223,6 +234,7 @@ func commands(cmd *kong.Node) string {
 func options(cmd *kong.Node) string {
 	s := &strings.Builder{}
 	flags := cmd.Flags
+	fmt.Printf("%+v\n", flags)
 
 	if len(flags) > 0 {
 		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
@@ -234,6 +246,7 @@ func options(cmd *kong.Node) string {
 			if f.Hidden {
 				continue
 			}
+			println(f.Group)
 			if f.Group != nil {
 				groups[f.Group.Key] = append(groups[f.Group.Key], f)
 			}
