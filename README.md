@@ -53,4 +53,5 @@ And are converted to the correct construct in the completion that is generated.
 
 ## TODO
 
-- Write() needs to get an io.Reader; if not given it writes to the default file
+- Write() needs to get an io.Reader; if not given it writes to the default file.
+- Possibly translate stuff?

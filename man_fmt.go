@@ -45,7 +45,7 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		fmt.Fprintf(s, " This option can be repeated.")
 	}
 	if f.Format != "" {
-		fmt.Fprintf(s, " This must be formatted according to %q.", f.Format)
+		fmt.Fprintf(s, " This must be formatted according as %q.", f.Format)
 	}
 
 	if f.Enum != "" {
