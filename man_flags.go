@@ -175,7 +175,7 @@ func formatArg(s io.Writer, p *kong.Positional) {
 		fmt.Fprintf(s, " The default is %q.", p.Default)
 	}
 
-	fmt.Fprintln(s)
+	fmt.Fprint(s, "\n\n")
 }
 
 func formatCmd(s io.Writer, cmd *kong.Command) {

@@ -19,6 +19,7 @@ Any struct field can have an extra tag:
 And for manual creation:
 
 - `description:""` text used in the description section of the manual page.
+- `deprecated:""` this flag is deprecated.
 
 I use [Zsh](https://zsh.org), so this is where my initial focus is. The
 [Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.

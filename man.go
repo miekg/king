@@ -36,19 +36,19 @@ type Man struct {
 //   - arguments: a rundown of each of the arguments this command has.
 //   - options: a list documenting each of the options.
 //   - globals: any global flags, from m.Flags.
-const ManTemplate = `{{name}}
+const ManTemplate = `{{name -}}
 
-{{synopsis}}
+{{synopsis -}}
 
-{{description}}
+{{description -}}
 
-{{commands}}
+{{commands -}}
 
-{{arguments}}
+{{arguments -}}
 
-{{options}}
+{{options -}}
 
-{{globals}}
+{{globals -}}
 `
 
 // Out returns the manual in markdown form.
@@ -138,7 +138,7 @@ workgroup = "%s"
 // nam implements the template func name.
 func nam(cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s - %s\n", cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
 }
 
 func synopsis(cmdname string, cmd *kong.Node) string {
@@ -187,6 +187,7 @@ func synopsis(cmdname string, cmd *kong.Node) string {
 		}
 	}
 	fmt.Fprintf(s, "`%s` %s%s%s%s\n", "c", aliases, cmdname, optstring, argstring)
+	fmt.Fprintln(s)
 	return s.String()
 }
 
@@ -194,6 +195,7 @@ func description(cmd *kong.Node) string {
 	s := &strings.Builder{}
 	fmt.Fprint(s, "## Description\n\n")
 	fmt.Fprint(s, cmd.Tag.Get("description"))
+	fmt.Fprintln(s)
 	return s.String()
 }
 
