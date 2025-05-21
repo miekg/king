@@ -15,6 +15,6 @@ func TestMan(t *testing.T) {
 		Area:      "User Commands",
 		WorkGroup: "The hard working team",
 	}
-	m.Manual(parser.Model.Node, "more")
+	m.Manual(parser.Model.Node, "c", "more")
 	println(string(m.Out()))
 }

@@ -7,7 +7,7 @@ type CompTest struct {
 
 type T struct {
 	Do   T1 `cmd:"" aliases:"d" help:"do it"`
-	More T1 `cmd:"" aliases:"m" help:"do it again"`
+	More T1 `cmd:"morethen-ever" aliases:"m" help:"do it again"`
 
 	EvenMore T2 `cmd:"" aliases:"e" help:"do it another time" description:"When running this command you need..."`
 }

@@ -57,13 +57,13 @@ func (m *Man) Write() error {
 	return os.WriteFile(fmt.Sprintf("%s.%d", m.name, m.Section), m.manual, 0644)
 }
 
-// name implements the template func name.
-func name(k, cmd *kong.Node) string {
+// nam implements the template func name.
+func nam(k, cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
 	return fmt.Sprintf("## Name\n\n%s %s - %s\n\n", k.Name, cmd.Name, help)
 }
 
-// Manual generates a manual page for field named name of the node.
+// Manual generates a manual page for field named field of the node.
 // On the node k the following tags are used:
 //
 //   - cmd:"....": command name, overrides k.<named>.Name
@@ -73,18 +73,19 @@ func name(k, cmd *kong.Node) string {
 //   - description:".....": The entire description paragraph.
 //
 // Note that any of these may contain markdown markup. The node k doesn't need any special tags.
-func (m *Man) Manual(k *kong.Node, exe string) { // add a field?
+func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 	var cmd *kong.Node
 	for _, c := range k.Children {
-		if c.Name == exe {
+		if c.Name == field {
 			cmd = c
 			break
 		}
 	}
-	// k.Name is exe, field is what we need
-	// m.name is exe
+	k.Name = name
+	m.name = name
+
 	if cmd == nil {
-		log.Printf("Failed to generate manual page: %q not found as child", exe)
+		log.Printf("Failed to generate manual page: %q not found as child", field)
 		return
 	}
 	fmt.Printf("%+v\n", cmd)
@@ -93,7 +94,7 @@ func (m *Man) Manual(k *kong.Node, exe string) { // add a field?
 	}
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return name(k, cmd) },
+		"name":        func() string { return nam(k, cmd) },
 		"description": func() string { return cmd.Tag.Get("description") },
 		"synopsis":    func() string { return "" },
 		"arguments":   func() string { return "" },
