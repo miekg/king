@@ -15,6 +15,7 @@ func TestMan(t *testing.T) {
 		Area:      "User Commands",
 		WorkGroup: "The hard working team",
 	}
+	// 'c' is the command that should be prefixed, and more is the field we are interested in.
 	m.Manual(parser.Model.Node, "c", "more")
 	println(string(m.Out()))
 }

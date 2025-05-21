@@ -77,6 +77,7 @@ func (m *Man) Write() error {
 //
 // If field is empty, the manual page for k is returned.
 func (m *Man) Manual(k *kong.Node, parent, field string) {
+	fmt.Printf("%+v\n", k)
 	cmd := k
 	for _, c := range k.Children {
 		if c.Name == field {
@@ -95,9 +96,9 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 	}
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return nam(cmd) },
+		"name":        func() string { return name(cmd, parent) },
 		"description": func() string { return description(cmd) },
-		"synopsis":    func() string { return synopsis(k.Name, cmd) },
+		"synopsis":    func() string { return synopsis(cmd, parent) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
 		"options":     func() string { return options(cmd) },
@@ -135,13 +136,19 @@ workgroup = "%s"
 	m.manual = b.Bytes()
 }
 
-// nam implements the template func name.
-func nam(cmd *kong.Node) string {
+// name implements the template func name.
+func name(cmd *kong.Node, parent string) string {
+	if parent != "" {
+		parent += " "
+	}
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s%s - %s\n\n", parent, cmd.Tag.Get("cmd"), help)
 }
 
-func synopsis(cmdname string, cmd *kong.Node) string {
+func synopsis(cmd *kong.Node, parent string) string {
+	if parent != "" {
+		parent += " "
+	}
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -173,20 +180,10 @@ func synopsis(cmdname string, cmd *kong.Node) string {
 		}
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	aliases := strings.Join(cmd.Aliases, "|")
-	if aliases != "" {
-		aliases += "|"
+	fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, cmd.Tag.Get("cmd"), optstring, argstring)
+	for _, alias := range cmd.Aliases {
+		fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, alias, optstring, argstring)
 	}
-	fmt.Fprintf(s, "`%s`%s%s\n\n", cmdname, optstring, argstring)
-	if cmd.Aliases != nil {
-		for _, alias := range cmd.Aliases {
-			if alias == cmdname {
-				continue // already done
-			}
-			fmt.Fprintf(s, "`%s`%s%s\n\n", alias, optstring, argstring)
-		}
-	}
-	fmt.Fprintf(s, "`%s` %s%s%s%s\n", "c", aliases, cmdname, optstring, argstring)
 	fmt.Fprintln(s)
 	return s.String()
 }
