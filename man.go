@@ -36,19 +36,19 @@ type Man struct {
 //   - arguments: a rundown of each of the arguments this command has.
 //   - options: a list documenting each of the options.
 //   - globals: any global flags, from m.Flags.
-const ManTemplate = `{{name -}}
+const ManTemplate = `{{name}}
 
-{{synopsis -}}
+{{synopsis}}
 
-{{description -}}
+{{description}}
 
-{{commands -}}
+{{commands}}
 
-{{arguments -}}
+{{arguments}}
 
-{{options -}}
+{{options}}
 
-{{globals -}}
+{{globals}}
 `
 
 // Out returns the manual in markdown form.
@@ -89,14 +89,14 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 	}
 	m.name = k.Name
 
-	if cmd == nil {
+	if cmd == nil && field != "" {
 		log.Printf("Failed to generate manual page: %q not found as child", field)
 		return
 	}
 
 	funcMap := template.FuncMap{
 		"name":        func() string { return nam(cmd) },
-		"description": func() string { return cmd.Tag.Get("description") },
+		"description": func() string { return description(cmd) },
 		"synopsis":    func() string { return synopsis(k.Name, cmd) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
@@ -138,7 +138,7 @@ workgroup = "%s"
 // nam implements the template func name.
 func nam(cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n", cmd.Tag.Get("cmd"), help)
 }
 
 func synopsis(cmdname string, cmd *kong.Node) string {
@@ -186,12 +186,20 @@ func synopsis(cmdname string, cmd *kong.Node) string {
 			fmt.Fprintf(s, "`%s`%s%s\n\n", alias, optstring, argstring)
 		}
 	}
-	fmt.Fprintf(s, "`%s` %s%s%s%s\n\n", "c", aliases, cmdname, optstring, argstring)
+	fmt.Fprintf(s, "`%s` %s%s%s%s\n", "c", aliases, cmdname, optstring, argstring)
+	return s.String()
+}
+
+func description(cmd *kong.Node) string {
+	s := &strings.Builder{}
+	fmt.Fprint(s, "## Description\n\n")
+	fmt.Fprint(s, cmd.Tag.Get("description"))
 	return s.String()
 }
 
 func arguments(cmd *kong.Node) string {
 	s := &strings.Builder{}
+	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
 	for _, p := range cmd.Positional {
 		formatArg(s, p)
 	}
@@ -199,9 +207,13 @@ func arguments(cmd *kong.Node) string {
 }
 
 func commands(cmd *kong.Node) string {
+	if !hasCommands(cmd) {
+		return ""
+	}
 	s := &strings.Builder{}
+	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
 	for _, c := range cmd.Children {
-		if c.Type == kong.CommandNode {
+		if c.Type == kong.CommandNode && !c.Hidden {
 			formatCmd(s, c)
 		}
 	}
@@ -220,12 +232,18 @@ func options(cmd *kong.Node) string {
 		// groups holds any grouped options
 		groups := map[string][]*kong.Flag{}
 		for _, f := range flags {
+			if f.Hidden {
+				continue
+			}
 			if f.Group != nil {
 				groups[f.Group.Key] = append(groups[f.Group.Key], f)
 			}
 		}
 
 		for _, f := range flags {
+			if f.Hidden {
+				continue
+			}
 			if f.Group == nil {
 				formatFlag(s, f)
 			}
@@ -240,7 +258,7 @@ func options(cmd *kong.Node) string {
 		keys := slices.Sorted(maps.Keys(groups))
 
 		for _, group := range keys {
-			fmt.Fprintf(s, "#### %s OPTIONS\n", strings.ToUpper(group))
+			fmt.Fprintf(s, "#### %s Options\n", strings.ToUpper(group))
 			for _, f := range groups[group] {
 				formatFlag(s, f, true)
 			}
