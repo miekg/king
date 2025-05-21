@@ -60,7 +60,12 @@ func (m *Man) Write() error {
 // nam implements the template func name.
 func nam(k, cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s %s - %s\n\n", k.Name, cmd.Name, help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
+}
+
+// synopsis implements the synopsis func name.
+func synopsis(k, cmd *kong.Node) string {
+
 }
 
 // Manual generates a manual page for field named field of the node.
@@ -126,7 +131,7 @@ workgroup = "%s"
 
 `
 	b := &bytes.Buffer{}
-	fmt.Fprintf(b, format, cmd.Name, m.Section, m.Area, m.WorkGroup)
+	fmt.Fprintf(b, format, cmd.Tag.Get("cmd"), m.Section, m.Area, m.WorkGroup)
 	if err = tmpl.Execute(b, nil); err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
 		return
