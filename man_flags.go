@@ -15,15 +15,16 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		q = "> "
 	}
 	if f.Tag.Has("negatable") {
-		name := strings.TrimPrefix(f.Name, "--")
-		fmt.Fprintf(s, "%s`--[no-]%s`", q, name)
+		fmt.Fprintf(s, "%s`--[no-]%s`", q, f.Name)
 	} else {
-		fmt.Fprintf(s, "%s`%s`", q, f.Name)
+		fmt.Fprintf(s, "%s`--%s`", q, f.Name)
 	}
 	if f.Short != 0 {
 		fmt.Fprintf(s, ", `-%c`", f.Short)
 	}
 	// TODO(miek): probably even more types then are now here.
+	// TODO(miek): entire rework this; what does it even attempt? And how can we make this do the right thing
+	// for custom types.
 	switch f.Target.Kind().String() {
 	case "Size", "slice", "string", "int", "uint", "uint8", "uint16", "uint32", "uint64":
 		// if the type:counter is set, this option can be repeated, and cannot have a value

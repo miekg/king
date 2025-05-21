@@ -66,6 +66,56 @@ func nam(k, cmd *kong.Node) string {
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
 }
 
+func synopsis(k, cmd *kong.Node) string {
+	s := &strings.Builder{}
+
+	optstring := " *[OPTION]*"
+	if len(cmd.Flags) == 0 {
+		optstring = ""
+	}
+	if len(cmd.Flags) > 0 {
+		optstring += "..."
+	}
+
+	argstring := ""
+	for _, a := range cmd.Positional {
+		name := a.Name
+		if a.Tag.PlaceHolder != "" {
+			name = a.Tag.PlaceHolder
+		}
+		if a.Required {
+			argstring += " *" + strings.ToUpper(name) + "*"
+		} else {
+			argstring += " *[" + strings.ToUpper(name) + "]*"
+		}
+	}
+	for _, f := range cmd.Flags {
+		if f.Required {
+			optstring += " " + f.Name
+			if f.PlaceHolder != "" {
+				optstring += " *" + strings.ToUpper(f.PlaceHolder) + "*"
+			}
+		}
+	}
+	fmt.Fprintf(s, "## Synopsis\n\n")
+	cmdname := k.Name
+	aliases := strings.Join(cmd.Aliases, "|")
+	if aliases != "" {
+		aliases += "|"
+	}
+	fmt.Fprintf(s, "`%s`%s%s\n\n", cmdname, optstring, argstring)
+	if cmd.Aliases != nil {
+		for _, alias := range cmd.Aliases {
+			if alias == cmdname {
+				continue // already done
+			}
+			fmt.Fprintf(s, "`%s`%s%s\n\n", alias, optstring, argstring)
+		}
+	}
+	fmt.Fprintf(s, "`%s` %s%s%s%s\n\n", "c", aliases, cmdname, optstring, argstring)
+	return s.String()
+}
+
 // options implements the options func name.
 func options(k, cmd *kong.Node) string {
 	s := &strings.Builder{}
@@ -100,13 +150,23 @@ func options(k, cmd *kong.Node) string {
 
 		for _, group := range keys {
 			fmt.Fprintf(s, "#### %s OPTIONS\n", strings.ToUpper(group))
-			for _, o := range groups[group] {
-				formatFlag(s, o, true)
+			for _, f := range groups[group] {
+				formatFlag(s, f, true)
 			}
 		}
-		return s.String()
 	}
-	return ""
+	return s.String()
+}
+
+func globals(flags []*kong.Flag) string {
+	s := &strings.Builder{}
+	if len(flags) > 0 {
+		fmt.Fprintf(s, "The following default options are available.\n\n")
+		for _, f := range flags {
+			formatFlag(s, f)
+		}
+	}
+	return s.String()
 }
 
 // Manual generates a manual page for field named field of the node.
@@ -142,11 +202,11 @@ func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 	funcMap := template.FuncMap{
 		"name":        func() string { return nam(k, cmd) },
 		"description": func() string { return cmd.Tag.Get("description") },
-		"synopsis":    func() string { return "" },
+		"synopsis":    func() string { return synopsis(k, cmd) },
 		"arguments":   func() string { return "" },
 		// commands?
 		"options": func() string { return options(k, cmd) },
-		"globals": func() string { return "" },
+		"globals": func() string { return globals(m.Flags) },
 	}
 
 	if m.Template == "" {
