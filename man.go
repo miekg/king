@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"maps"
 	"os"
+	"slices"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -65,7 +68,45 @@ func nam(k, cmd *kong.Node) string {
 
 // synopsis implements the synopsis func name.
 func synopsis(k, cmd *kong.Node) string {
+	s := &strings.Builder{}
+	flags := cmd.Flags
 
+	if len(flags) > 1 {
+
+		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
+		fmt.Fprintf(s, "### Options\n\n")
+
+		// groups holds any grouped options
+		groups := map[string][]*kong.Flag{}
+		for _, f := range flags {
+			if f.Group.Key != "" {
+				groups[f.Group.Key] = append(groups[f.Group.Key], f)
+			}
+		}
+
+		for _, f := range flags {
+			if f.Group == nil {
+				formatFlag(s, f)
+			}
+		}
+		fmt.Fprintln(s)
+		// format groups options
+		for k := range groups {
+			if k != strings.ToLower(k) {
+				log.Fatalf("Group keys must be all lowercase: %s", k)
+			}
+		}
+		keys := slices.Sorted(maps.Keys(groups))
+
+		for _, group := range keys {
+			fmt.Fprintf(s, "#### %s OPTIONS\n", strings.ToUpper(group))
+			for _, o := range groups[group] {
+				formatFlag(s, o, true)
+			}
+		}
+		return s.String()
+	}
+	return ""
 }
 
 // Manual generates a manual page for field named field of the node.
@@ -101,7 +142,7 @@ func (m *Man) Manual(k *kong.Node, name, field string) { // add a field?
 	funcMap := template.FuncMap{
 		"name":        func() string { return nam(k, cmd) },
 		"description": func() string { return cmd.Tag.Get("description") },
-		"synopsis":    func() string { return "" },
+		"synopsis":    func() string { return synopsis(k, cmd) },
 		"arguments":   func() string { return "" },
 		// commands?
 		"options": func() string { return "" },
