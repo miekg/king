@@ -95,7 +95,7 @@ func (m *Man) Manual(k *kong.Node, field string) {
 			break
 		}
 	}
-	m.name = cmd.Tag.Get("cmd")
+	m.name = nodeName(cmd)
 
 	if cmd == nil && field != "" {
 		log.Printf("Failed to generate manual page: %q not found as child", field)
@@ -135,7 +135,7 @@ workgroup = "%s"
 
 `
 	b := &bytes.Buffer{}
-	fmt.Fprintf(b, format, cmd.Tag.Get("cmd"), m.Section, m.Area, m.WorkGroup)
+	fmt.Fprintf(b, format, nodeName(cmd), m.Section, m.Area, m.WorkGroup)
 	if err = tmpl.Execute(b, nil); err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
 		return
@@ -194,7 +194,7 @@ func synopsis(cmd *kong.Node) string {
 		} else {
 			cmdstring = " "
 		}
-		cmdstring += "`" + cmdname + "`"
+		cmdstring += cmdname
 	}
 	if len(cmdstring) > 40 { // dumb check, but we can have a lorge number of subcommands
 		cmdstring = " *[COMMANDS]*..."
@@ -248,7 +248,6 @@ func commands(cmd *kong.Node) string {
 func options(cmd *kong.Node) string {
 	s := &strings.Builder{}
 	flags := cmd.Flags
-	fmt.Printf("%+v\n", flags)
 
 	if len(flags) > 0 {
 		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
@@ -260,7 +259,6 @@ func options(cmd *kong.Node) string {
 			if f.Hidden {
 				continue
 			}
-			println(f.Group)
 			if f.Group != nil {
 				groups[f.Group.Key] = append(groups[f.Group.Key], f)
 			}
