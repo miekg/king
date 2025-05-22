@@ -12,9 +12,9 @@ import (
 
 // The Completer interface must be implemented by every shell completer. It mainly serves for documentation.
 type Completer interface {
-	// Completion generates the completion for a shell starting with k. The exename - if not empty - takes
+	// Completion generates the completion for a shell starting with k. The altname - if not empty - takes
 	// precedence over k.Name.
-	Completion(k *kong.Node, exename string)
+	Completion(k *kong.Node, altname string)
 	// Out returns the generated shell completion script.
 	Out() []byte
 	// Write writes the generated shell completion script to the appropiate file, for Zsh this is _exename and for Bash this is exename.bash
@@ -25,6 +25,15 @@ var (
 	_ Completer = (*Zsh)(nil)
 	_ Completer = (*Bash)(nil)
 )
+
+// TODO(miek): commandName vs the name used in the manual...
+func nodeName(n *kong.Node) string {
+	name := n.Tag.Get("cmd")
+	if name != "" {
+		return name
+	}
+	return n.Name
+}
 
 // commandName returns the full path of the kong node. Any alias is ignored.
 func commandName(n *kong.Node) (out string) {

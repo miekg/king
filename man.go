@@ -27,7 +27,7 @@ type Man struct {
 	WorkGroup string
 	Template  string // If empty [ManTemplate] is used.
 	manual    []byte
-	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal options.
+	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal flags.
 }
 
 // ManTemplate is the default manual page template used when generating a manual page. Where each function
@@ -84,11 +84,10 @@ func (m *Man) Write() error {
 //     this text ends in a dot it is removed.
 //   - description:".....": The entire description paragraph.
 //
-// Note that any of these may contain markdown markup. The node k doesn't need any special tags. The string parent
-// is used as an optional parent command name, that should be prefixed in the synopsis on how to execcute the current command.
+// Note that any of these may contain markdown markup. The node k doesn't need any special
 //
 // If field is empty, the manual page for k is returned.
-func (m *Man) Manual(k *kong.Node, parent, field string) {
+func (m *Man) Manual(k *kong.Node, field string) {
 	cmd := k
 	for _, c := range k.Children {
 		if c.Name == field {
@@ -96,10 +95,7 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 			break
 		}
 	}
-	if parent != "" {
-		k.Name = parent
-	}
-	m.name = cmd.Tag.Get("cmd")
+	m.name = nodeName(cmd)
 
 	if cmd == nil && field != "" {
 		log.Printf("Failed to generate manual page: %q not found as child", field)
@@ -107,9 +103,9 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 	}
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return name(cmd, parent) },
+		"name":        func() string { return name(cmd) },
 		"description": func() string { return description(cmd) },
-		"synopsis":    func() string { return synopsis(cmd, parent) },
+		"synopsis":    func() string { return synopsis(cmd) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
 		"options":     func() string { return options(cmd) },
@@ -139,7 +135,7 @@ workgroup = "%s"
 
 `
 	b := &bytes.Buffer{}
-	fmt.Fprintf(b, format, cmd.Tag.Get("cmd"), m.Section, m.Area, m.WorkGroup)
+	fmt.Fprintf(b, format, nodeName(cmd), m.Section, m.Area, m.WorkGroup)
 	if err = tmpl.Execute(b, nil); err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
 		return
@@ -148,18 +144,12 @@ workgroup = "%s"
 }
 
 // name implements the template func name.
-func name(cmd *kong.Node, parent string) string {
-	if parent != "" {
-		parent += " "
-	}
+func name(cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s%s - %s\n\n", parent, cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", nodeName(cmd), help)
 }
 
-func synopsis(cmd *kong.Node, parent string) string {
-	if parent != "" {
-		parent += " "
-	}
+func synopsis(cmd *kong.Node) string {
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -190,10 +180,30 @@ func synopsis(cmd *kong.Node, parent string) string {
 			}
 		}
 	}
+	cmdstring := ""
+	for _, c := range cmd.Children {
+		if c.Hidden {
+			continue
+		}
+		if c.Type != kong.CommandNode {
+			continue
+		}
+		cmdname := nodeName(c)
+		if cmdstring != "" {
+			cmdstring += "|"
+		} else {
+			cmdstring = " "
+		}
+		cmdstring += cmdname
+	}
+	if len(cmdstring) > 40 { // dumb check, but we can have a lorge number of subcommands
+		cmdstring = " *[COMMANDS]*..."
+	}
+
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, cmd.Tag.Get("cmd"), optstring, argstring)
+	fmt.Fprintf(s, "`%s`%s%s%s\n\n", nodeName(cmd), optstring, argstring, cmdstring)
 	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, alias, optstring, argstring)
+		fmt.Fprintf(s, "`%s`%s%s%s\n\n", alias, optstring, argstring, cmdstring)
 	}
 	fmt.Fprintln(s)
 	return s.String()
@@ -208,9 +218,13 @@ func description(cmd *kong.Node) string {
 }
 
 func arguments(cmd *kong.Node) string {
+	if !hasPositional(cmd) {
+		return ""
+	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following positional arguments are supported:\n\n")
 	for _, p := range cmd.Positional {
+		// hidden!
 		formatArg(s, p)
 	}
 	return s.String()
@@ -221,7 +235,7 @@ func commands(cmd *kong.Node) string {
 		return ""
 	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following commands are supported:\n\n")
 	for _, c := range cmd.Children {
 		if c.Type == kong.CommandNode && !c.Hidden {
 			formatCmd(s, c)
@@ -234,7 +248,6 @@ func commands(cmd *kong.Node) string {
 func options(cmd *kong.Node) string {
 	s := &strings.Builder{}
 	flags := cmd.Flags
-	fmt.Printf("%+v\n", flags)
 
 	if len(flags) > 0 {
 		sort.Slice(flags, func(i, j int) bool { return flags[i].Name < flags[j].Name })
@@ -246,7 +259,6 @@ func options(cmd *kong.Node) string {
 			if f.Hidden {
 				continue
 			}
-			println(f.Group)
 			if f.Group != nil {
 				groups[f.Group.Key] = append(groups[f.Group.Key], f)
 			}
@@ -270,7 +282,7 @@ func options(cmd *kong.Node) string {
 		keys := slices.Sorted(maps.Keys(groups))
 
 		for _, group := range keys {
-			fmt.Fprintf(s, "#### %s Options\n", strings.ToUpper(group))
+			fmt.Fprintf(s, "#### %s Options\n\n", group)
 			for _, f := range groups[group] {
 				formatFlag(s, f, true)
 			}
