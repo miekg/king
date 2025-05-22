@@ -45,7 +45,7 @@ func TestZsh(t *testing.T) {
 	}{
 		{"myexe --", "--help\r\n--man"},
 		{"myexe --m", "--man"},
-		{"myexe ", "d\r\ndo\r\nmore\r\ne\r\neven-more"},
+		{"myexe ", "d\r\ndo\r\nagain\r\nmore\r\neven-more"},
 	}
 
 	for i := range tests {

@@ -35,13 +35,13 @@ compdef _%[1]s %[1]s
 
 `
 	var out strings.Builder
-	fmt.Fprintf(&out, format, name)
 	if altname == "" {
 		z.name = k.Name
 	} else {
 		z.name = altname
 		k.Name = altname
 	}
+	fmt.Fprintf(&out, format, z.name)
 	z.gen(&out, k)
 	z.completion = []byte(out.String())
 }

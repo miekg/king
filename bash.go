@@ -32,13 +32,13 @@ func (b *Bash) Completion(k *kong.Node, altname string) {
 
 `
 	var out strings.Builder
-	fmt.Fprintf(&out, format, name)
 	if altname == "" {
 		b.name = k.Name
 	} else {
 		b.name = altname
 		k.Name = altname
 	}
+	fmt.Fprintf(&out, format, b.name)
 	b.gen(&out, k)
 	b.completion = []byte(out.String())
 }
