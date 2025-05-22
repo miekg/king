@@ -24,7 +24,8 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	}
 
 	switch {
-	case f.Tag.Get("type") == "counter":
+	case f.IsCounter():
+	case f.IsBool():
 
 	case f.PlaceHolder != "":
 		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.PlaceHolder))
