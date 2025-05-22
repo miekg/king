@@ -25,7 +25,7 @@ func (z *Zsh) Write() error {
 	return os.WriteFile("_"+z.name, z.completion, 0644)
 }
 
-func (z *Zsh) Completion(k *kong.Node, name string) {
+func (z *Zsh) Completion(k *kong.Node, altname string) {
 	k.Flags = append(k.Flags, z.Flags...)
 
 	format := `#compdef %[1]s
@@ -36,8 +36,12 @@ compdef _%[1]s %[1]s
 `
 	var out strings.Builder
 	fmt.Fprintf(&out, format, name)
-	z.name = name
-	k.Name = name
+	if altname == "" {
+		z.name = k.Name
+	} else {
+		z.name = altname
+		k.Name = altname
+	}
 	z.gen(&out, k)
 	z.completion = []byte(out.String())
 }

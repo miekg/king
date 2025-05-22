@@ -120,16 +120,13 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 }
 
 func formatArg(s io.Writer, p *kong.Positional) {
+	// TODO: more needed, same is true for formatCmd?
 	name := p.Name
 	if p.Tag.PlaceHolder != "" {
 		name = p.Tag.PlaceHolder
 	}
-	// required opts....
-	fmt.Fprintf(s, "`%s`", strings.ToUpper(name))
-	if p.Tag.Short != 0 {
-		fmt.Fprintf(s, ", `-%c`", p.Tag.Short)
-	}
-	fmt.Fprintln(s)
+
+	fmt.Fprintf(s, "`%s`\n", strings.ToUpper(name))
 	fmt.Fprintf(s, ":   %s", p.Help)
 	if !p.Required {
 		fmt.Fprintf(s, " This argument is optional.")
@@ -162,6 +159,13 @@ func formatArg(s io.Writer, p *kong.Positional) {
 	fmt.Fprint(s, "\n\n")
 }
 
-func formatCmd(s io.Writer, cmd *kong.Command) {
-	fmt.Fprintf(s, "%+v\n", cmd)
+func formatCmd(s io.Writer, c *kong.Command) {
+	// todo: cmds are not printed in synopsis
+	// fmt.Fprintf(s, "%+v\n", c)
+	name := c.Name
+	if x := c.Tag.Get("cmd"); x != "" {
+		name = x
+	}
+	fmt.Fprintf(s, "`%s`\n", strings.ToUpper(name))
+	fmt.Fprintf(s, ":   %s", c.Help)
 }

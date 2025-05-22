@@ -6,17 +6,18 @@ import (
 	"github.com/alecthomas/kong"
 )
 
+var manf = &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page.", Tag: &kong.Tag{}}}
+
 func TestMan(t *testing.T) {
 	parser := kong.Must(&T{})
-	manf := &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensitive manual page.", Tag: &kong.Tag{}}}
-	m := &Man{
-		Flags:     []*kong.Flag{manf},
-		Section:   1,
-		Area:      "User Commands",
-		WorkGroup: "The hard working team",
-	}
-	// 'c' is the command that should be prefixed, and more is the field we are interested in.
-	m.Manual(parser.Model.Node, "c", "more")
+	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "more")
 	println(string(m.Out()))
-	m.Write()
+}
+
+func TestManT2(t *testing.T) {
+	parser := kong.Must(&T{})
+	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "even-more")
+	println(string(m.Out()))
 }

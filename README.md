@@ -16,13 +16,13 @@ Any struct field can have an extra tag:
   `<` and `>` which should be a Bash action as specified in the `complete` function in bash(1), like `<file>`
   or `<directory>`. These are translated to things Zsh understands.
 
+I use [Zsh](https://zsh.org), so this is where my initial focus is. The
+[Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
+
 And for manual creation:
 
 - `description:""` text used in the description section of the manual page.
 - `deprecated:""` this flag is deprecated.
-
-I use [Zsh](https://zsh.org), so this is where my initial focus is. The
-[Bash](https://www.gnu.org/software/bash/) completion works, but can probably be done a lot better.
 
 Extra flags can be injected:
 
@@ -36,7 +36,11 @@ fl := &kong.Flag{
 }
 ```
 
-And then assign it the to `Flags` in Zsh or Bash.
+And then assign it the to `Flags` in Zsh, Bash or Man.
+
+Note that for completion you give it a *kong.Node and the completion rolls out, for manual creation you give
+it a *parent\* \*kong.Node and a field name. This is needed because for manual creation a lot of documentation
+tags are defined on that parent.
 
 Run the tests to see example files being created.
 

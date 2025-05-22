@@ -84,20 +84,16 @@ func (m *Man) Write() error {
 //     this text ends in a dot it is removed.
 //   - description:".....": The entire description paragraph.
 //
-// Note that any of these may contain markdown markup. The node k doesn't need any special tags. The string parent
-// is used as an optional parent command name, that should be prefixed in the synopsis on how to execcute the current command.
+// Note that any of these may contain markdown markup. The node k doesn't need any special
 //
 // If field is empty, the manual page for k is returned.
-func (m *Man) Manual(k *kong.Node, parent, field string) {
+func (m *Man) Manual(k *kong.Node, field string) {
 	cmd := k
 	for _, c := range k.Children {
 		if c.Name == field {
 			cmd = c
 			break
 		}
-	}
-	if parent != "" {
-		k.Name = parent
 	}
 	m.name = cmd.Tag.Get("cmd")
 
@@ -107,9 +103,9 @@ func (m *Man) Manual(k *kong.Node, parent, field string) {
 	}
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return name(cmd, parent) },
+		"name":        func() string { return name(cmd) },
 		"description": func() string { return description(cmd) },
-		"synopsis":    func() string { return synopsis(cmd, parent) },
+		"synopsis":    func() string { return synopsis(cmd) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
 		"options":     func() string { return options(cmd) },
@@ -148,18 +144,12 @@ workgroup = "%s"
 }
 
 // name implements the template func name.
-func name(cmd *kong.Node, parent string) string {
-	if parent != "" {
-		parent += " "
-	}
+func name(cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s%s - %s\n\n", parent, cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
 }
 
-func synopsis(cmd *kong.Node, parent string) string {
-	if parent != "" {
-		parent += " "
-	}
+func synopsis(cmd *kong.Node) string {
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -191,9 +181,9 @@ func synopsis(cmd *kong.Node, parent string) string {
 		}
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, cmd.Tag.Get("cmd"), optstring, argstring)
+	fmt.Fprintf(s, "`%s`%s%s\n\n", cmd.Tag.Get("cmd"), optstring, argstring)
 	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s%s`%s%s\n\n", parent, alias, optstring, argstring)
+		fmt.Fprintf(s, "`%s`%s%s\n\n", alias, optstring, argstring)
 	}
 	fmt.Fprintln(s)
 	return s.String()
@@ -211,6 +201,7 @@ func arguments(cmd *kong.Node) string {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
 	for _, p := range cmd.Positional {
+		// hidden!
 		formatArg(s, p)
 	}
 	return s.String()
@@ -270,7 +261,7 @@ func options(cmd *kong.Node) string {
 		keys := slices.Sorted(maps.Keys(groups))
 
 		for _, group := range keys {
-			fmt.Fprintf(s, "#### %s Options\n", strings.ToUpper(group))
+			fmt.Fprintf(s, "#### %s Options\n\n", group)
 			for _, f := range groups[group] {
 				formatFlag(s, f, true)
 			}
