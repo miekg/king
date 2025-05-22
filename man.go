@@ -75,7 +75,8 @@ func (m *Man) Write() error {
 	return os.WriteFile(fmt.Sprintf("%s.%d", m.name, m.Section), md, 0644)
 }
 
-// Manual generates a manual page for field named field of the node.
+// Manual generates a manual page for child node that can be found via field, where field may contain
+// a space seperated list of node names: "mfa list", looks for the mfa node and its child named list.
 // On the node k the following tags are used:
 //
 //   - cmd:"....": command name, overrides k.<named>.Name
@@ -88,12 +89,9 @@ func (m *Man) Write() error {
 //
 // If field is empty, the manual page for k is returned.
 func (m *Man) Manual(k *kong.Node, field string) {
-	cmd := k
-	for _, c := range k.Children {
-		if c.Name == field {
-			cmd = c
-			break
-		}
+	cmd := nodeByPath(k, strings.Fields(field))
+	if cmd == nil {
+		cmd = k
 	}
 	m.name = nodeName(cmd)
 
