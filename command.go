@@ -26,6 +26,15 @@ var (
 	_ Completer = (*Bash)(nil)
 )
 
+// TODO(miek): commandName vs the name used in the manual...
+func nodeName(n *kong.Node) string {
+	name := n.Tag.Get("cmd")
+	if name != "" {
+		return name
+	}
+	return n.Name
+}
+
 // commandName returns the full path of the kong node. Any alias is ignored.
 func commandName(n *kong.Node) (out string) {
 	root := n

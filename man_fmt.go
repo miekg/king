@@ -166,6 +166,6 @@ func formatCmd(s io.Writer, c *kong.Command) {
 	if x := c.Tag.Get("cmd"); x != "" {
 		name = x
 	}
-	fmt.Fprintf(s, "`%s`\n", strings.ToUpper(name))
-	fmt.Fprintf(s, ":   %s", c.Help)
+	fmt.Fprintf(s, "`%s`\n", name)
+	fmt.Fprintf(s, ":   %s\n\n", c.Help)
 }

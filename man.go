@@ -27,7 +27,7 @@ type Man struct {
 	WorkGroup string
 	Template  string // If empty [ManTemplate] is used.
 	manual    []byte
-	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal options.
+	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal flags.
 }
 
 // ManTemplate is the default manual page template used when generating a manual page. Where each function
@@ -146,7 +146,7 @@ workgroup = "%s"
 // name implements the template func name.
 func name(cmd *kong.Node) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s - %s\n\n", cmd.Tag.Get("cmd"), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", nodeName(cmd), help)
 }
 
 func synopsis(cmd *kong.Node) string {
@@ -180,10 +180,30 @@ func synopsis(cmd *kong.Node) string {
 			}
 		}
 	}
+	cmdstring := ""
+	for _, c := range cmd.Children {
+		if c.Hidden {
+			continue
+		}
+		if c.Type != kong.CommandNode {
+			continue
+		}
+		cmdname := nodeName(c)
+		if cmdstring != "" {
+			cmdstring += "|"
+		} else {
+			cmdstring = " "
+		}
+		cmdstring += "`" + cmdname + "`"
+	}
+	if len(cmdstring) > 40 { // dumb check, but we can have a lorge number of subcommands
+		cmdstring = " *[COMMANDS]*..."
+	}
+
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	fmt.Fprintf(s, "`%s`%s%s\n\n", cmd.Tag.Get("cmd"), optstring, argstring)
+	fmt.Fprintf(s, "`%s`%s%s%s\n\n", nodeName(cmd), optstring, argstring, cmdstring)
 	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s`%s%s\n\n", alias, optstring, argstring)
+		fmt.Fprintf(s, "`%s`%s%s%s\n\n", alias, optstring, argstring, cmdstring)
 	}
 	fmt.Fprintln(s)
 	return s.String()
@@ -198,8 +218,11 @@ func description(cmd *kong.Node) string {
 }
 
 func arguments(cmd *kong.Node) string {
+	if !hasPositional(cmd) {
+		return ""
+	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following positional arguments are supported:\n\n")
 	for _, p := range cmd.Positional {
 		// hidden!
 		formatArg(s, p)
@@ -212,7 +235,7 @@ func commands(cmd *kong.Node) string {
 		return ""
 	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "The following positional arguments are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following commands are supported:\n\n")
 	for _, c := range cmd.Children {
 		if c.Type == kong.CommandNode && !c.Hidden {
 			formatCmd(s, c)
