@@ -8,7 +8,8 @@ This package copies from [gum](https://github.com/charmbracelet/gum) and made in
 some extra features, like telling (via struct tags) how certain things must be completed. Also the Bash
 completions are completely reworked and for both Zsh and Bash positional argument completion also works.
 
-King can _also_ generate manual pages from a Kong node, see godoc for more information.
+King can _also_ generate manual pages from a Kong node, see godoc for more information. However this is
+experimental and there are a number of open issues.
 
 Any struct field can have an extra tag:
 
