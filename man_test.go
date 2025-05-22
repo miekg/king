@@ -20,4 +20,5 @@ func TestManT2(t *testing.T) {
 	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
 	m.Manual(parser.Model.Node, "even-more")
 	println(string(m.Out()))
+	m.Write()
 }
