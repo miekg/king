@@ -35,6 +35,21 @@ func nodeName(n *kong.Node) string {
 	return n.Name
 }
 
+func nodeByPath(n *kong.Node, path []string) *kong.Node {
+	if len(path) == 0 {
+		return n
+	}
+
+	for _, c := range n.Children {
+		if c.Name == path[0] {
+			if x := nodeByPath(c, path[1:]); x != nil {
+				return x
+			}
+		}
+	}
+	return nil
+}
+
 // commandName returns the full path of the kong node. Any alias is ignored.
 func commandName(n *kong.Node) (out string) {
 	root := n
