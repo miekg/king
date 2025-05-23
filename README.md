@@ -8,8 +8,7 @@ This package copies from [gum](https://github.com/charmbracelet/gum) and made in
 some extra features, like telling (via struct tags) how certain things must be completed. Also the Bash
 completions are completely reworked and for both Zsh and Bash positional argument completion also works.
 
-King can _also_ generate manual pages from a Kong node, see godoc for more information. However this is
-experimental and there are a number of open issues.
+King can _also_ generate manual pages from a Kong node, see godoc for more information.
 
 Any struct field can have an extra tag:
 
@@ -40,7 +39,7 @@ fl := &kong.Flag{
 And then assign it the to `Flags` in Zsh, Bash or Man.
 
 Note that for completion you give it a *kong.Node and the completion rolls out, for manual creation you give
-it the *upper* `*kong.Node`and a path through the`cmd` field names.
+it the *root* `*kong.Node`and a path through the`cmd` field names.
 This is needed because we need a fully parsed Node tree as made by Kong to have access to all tags.
 
 Run the tests to see example files being created.
@@ -55,8 +54,3 @@ The following actions are supported:
 - "export"
 
 And are converted to the correct construct in the completion that is generated.
-
-## TODO
-
-- Write() needs to get an io.Reader; if not given it writes to the default file.
-- aliases are split on , and ' ', maybe we should add a cmdaliases backup that splits the way we want?

@@ -202,9 +202,12 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	}
 
 	fields := strings.Fields(path)
-	path = strings.Join(fields[:len(fields)-1], " ") + " "
+	path = strings.Join(fields[:len(fields)-1], " ")
 	if rootname != "" {
 		rootname += " "
+	}
+	if path != "" {
+		path += " "
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
 	fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
