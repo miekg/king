@@ -232,7 +232,7 @@ func arguments(cmd *kong.Node) string {
 		return ""
 	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "\nThe following positional arguments are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following positional arguments are available:\n\n")
 	for _, p := range cmd.Positional {
 		// hidden!
 		formatArg(s, p)
@@ -245,7 +245,7 @@ func commands(cmd *kong.Node) string {
 		return ""
 	}
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "\nThe following commands are supported:\n\n")
+	fmt.Fprintf(s, "\nThe following subcommands are available:\n\n")
 	for _, c := range cmd.Children {
 		if c.Type == kong.CommandNode && !c.Hidden {
 			formatCmd(s, c)
