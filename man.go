@@ -90,19 +90,18 @@ func (m *Man) Write() error {
 // If path is empty, the manual page for k is returned, altname is used as an alternative name for this command, which
 // is not found in any of the tags. This is also the default name under which the manual page is saved.
 //
-// When path is is not empty it should have a list of command names which are followed to find the parent node and it's sibling
+// When path is is not empty it should have a list of command names which are followed to find the node
 // for which we generate the manual page. This path is also used to construct the command line(s) in the synopsis.
 //
 // rootname is the name of the main executable, this can now be put as a tag on the main node, as that node itself can't carry struct tags.
 func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	fields := strings.Fields(path)
 	cmd := nodePath(k, fields)
-	parent := nodePath(k, fields[:len(fields)-1])
 	m.name = altname
 
 	funcMap := template.FuncMap{
 		"name":        func() string { return name(cmd, altname) },
-		"description": func() string { return description(parent) },
+		"description": func() string { return description(cmd) },
 		"synopsis":    func() string { return synopsis(cmd, path, altname, rootname) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
@@ -148,8 +147,6 @@ func name(cmd *kong.Node, altname string) string {
 }
 
 func synopsis(cmd *kong.Node, path, altname, rootname string) string {
-	fields := strings.Fields(path)
-	path = strings.Join(fields[:len(fields)-1], " ")
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -200,11 +197,16 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		cmdstring = " *[COMMANDS]*..."
 	}
 
+	fields := strings.Fields(path)
+	path = strings.Join(fields[:len(fields)-1], " ") + " "
+	if rootname != "" {
+		rootname += " "
+	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
 	fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
-	fmt.Fprintf(s, "`%s %s %s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
+	fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
 	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s %s`%s%s%s\n\n", path, alias, optstring, argstring, cmdstring)
+		fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, alias, optstring, argstring, cmdstring)
 	}
 	fmt.Fprintln(s)
 	return s.String()

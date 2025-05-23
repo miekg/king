@@ -15,3 +15,11 @@ func TestMan(t *testing.T) {
 	println(string(m.Out()))
 	m.Write()
 }
+
+func TestMan2(t *testing.T) {
+	parser := kong.Must(&T{})
+	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "even-more", "ListMore", "c")
+	println(string(m.Out()))
+	m.Write()
+}
