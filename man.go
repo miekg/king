@@ -205,7 +205,10 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	}
 
 	fields := strings.Fields(path)
-	path = strings.Join(fields[:len(fields)-1], " ")
+	path = ""
+	if len(fields) > 0 {
+		path = strings.Join(fields[:len(fields)-1], " ")
+	}
 	if rootname != "" {
 		rootname += " "
 	}
