@@ -28,9 +28,7 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	case f.IsBool():
 
 	case f.PlaceHolder != "":
-		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.PlaceHolder))
-	case f.PlaceHolder == "":
-		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
+		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.FormatPlaceHolder()))
 	}
 
 	fmt.Fprintln(s)

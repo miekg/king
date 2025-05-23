@@ -42,6 +42,8 @@ Note that for completion you give it a *kong.Node and the completion rolls out, 
 it the *root* `*kong.Node`and a path through the`cmd` field names.
 This is needed because we need a fully parsed Node tree as made by Kong to have access to all tags.
 
+If a flag needs on argument you must put the name of the argument in "placeholder".
+
 Run the tests to see example files being created.
 
 ## Supported "actions"

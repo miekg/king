@@ -15,7 +15,7 @@ type T struct {
 }
 
 type T1 struct {
-	Status  *string    `enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
+	Status  *string    `placeholder:"status" enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
 	Enddate *time.Time `help:"Set the end date." format:"2006-01-02" aliases:"afloopdatum" group:"end date"`
 
 	Volume string `arg:"" placeholder:"server[:vol]|ID|vol" help:"Volume to change." completion:"echo a b c" type:"existingvolume"`
@@ -23,7 +23,7 @@ type T1 struct {
 }
 
 type T2 struct {
-	Status *string `enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
+	Status *string `placeholder:"status" enum:"ok,setup,dst,archive,rm" help:"Set the status for this volume to *STATUS*. See **VOLUME STATUS** section." aliases:"stat" short:"s"`
 
 	DoEvenMore   T3 `cmd:"" help:"do it agian, but more." description:"T3: this is the thing we want to see."`
 	WhatEvenMore T4 `cmd:"" help:"do it again, but even more."`
