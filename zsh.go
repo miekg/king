@@ -159,7 +159,7 @@ func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node) {
 		z.name = ""
 		z.gen(buf, c)
 	}
-	cmdName := commandName(cmd)
+	cmdName := funcName(cmd)
 
 	if z.name != "" {
 		writeString(buf, fmt.Sprintf("_%s() {\n", z.name))
@@ -192,10 +192,10 @@ func (z Zsh) gen(buf io.StringWriter, cmd *kong.Node) {
 			}
 			for _, a := range c.Aliases {
 				writeString(buf, fmt.Sprintf("                %s)\n", a))
-				writeString(buf, fmt.Sprintf("                    _%s;;\n", commandName(c)))
+				writeString(buf, fmt.Sprintf("                    _%s;;\n", funcName(c)))
 			}
 			writeString(buf, fmt.Sprintf("                %s)\n", c.Name))
-			writeString(buf, fmt.Sprintf("                    _%s;;\n", commandName(c)))
+			writeString(buf, fmt.Sprintf("                    _%s;;\n", funcName(c)))
 		}
 		writeString(buf, "            esac\n")
 		writeString(buf, "            ;;\n")

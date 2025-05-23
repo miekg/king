@@ -87,23 +87,21 @@ func (m *Man) Write() error {
 //
 // Note that any of these may contain markdown markup. The node k doesn't need any special
 //
-// If field is empty, the manual page for k is returned.
-func (m *Man) Manual(k *kong.Node, field string) {
-	cmd := nodeByPath(k, strings.Fields(field))
-	if cmd == nil {
-		cmd = k
-	}
-	m.name = nodeName(cmd)
-
-	if cmd == nil && field != "" {
-		log.Printf("Failed to generate manual page: %q not found as child", field)
-		return
-	}
+// If path is empty, the manual page for k is returned, altname is used as an alternative name for this command, which
+// is not found in any of the tags. This is also the default name under which the manual page is saved.
+//
+// When path is is not empty it should have a list of command names which are followed to find the parent node and it's sibling
+// for which we generate the manual page. This path is also used to construct the command line(s) in the synopsis.
+func (m *Man) Manual(k *kong.Node, path, altname string) {
+	fields := strings.Fields(path)
+	cmd := nodePath(k, fields)
+	parent := nodePath(k, fields[:len(fields)-1])
+	m.name = altname
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return name(cmd) },
-		"description": func() string { return description(cmd) },
-		"synopsis":    func() string { return synopsis(cmd) },
+		"name":        func() string { return name(cmd, altname) },
+		"description": func() string { return description(parent) },
+		"synopsis":    func() string { return synopsis(cmd, path, altname) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
 		"options":     func() string { return options(cmd) },
@@ -133,7 +131,7 @@ workgroup = "%s"
 
 `
 	b := &bytes.Buffer{}
-	fmt.Fprintf(b, format, nodeName(cmd), m.Section, m.Area, m.WorkGroup)
+	fmt.Fprintf(b, format, altname, m.Section, m.Area, m.WorkGroup)
 	if err = tmpl.Execute(b, nil); err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
 		return
@@ -142,12 +140,14 @@ workgroup = "%s"
 }
 
 // name implements the template func name.
-func name(cmd *kong.Node) string {
+func name(cmd *kong.Node, altname string) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
-	return fmt.Sprintf("## Name\n\n%s - %s\n\n", nodeName(cmd), help)
+	return fmt.Sprintf("## Name\n\n%s - %s\n\n", altname, help)
 }
 
-func synopsis(cmd *kong.Node) string {
+func synopsis(cmd *kong.Node, path, altname string) string {
+	fields := strings.Fields(path)
+	path = strings.Join(fields[:len(fields)-1], " ")
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -186,7 +186,7 @@ func synopsis(cmd *kong.Node) string {
 		if c.Type != kong.CommandNode {
 			continue
 		}
-		cmdname := nodeName(c)
+		cmdname := commandName(c)
 		if cmdstring != "" {
 			cmdstring += "|"
 		} else {
@@ -199,9 +199,10 @@ func synopsis(cmd *kong.Node) string {
 	}
 
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	fmt.Fprintf(s, "`%s`%s%s%s\n\n", nodeName(cmd), optstring, argstring, cmdstring)
+	fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
+	fmt.Fprintf(s, "`%s %s`%s%s%s\n\n", path, commandName(cmd), optstring, argstring, cmdstring)
 	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s`%s%s%s\n\n", alias, optstring, argstring, cmdstring)
+		fmt.Fprintf(s, "`%s %s`%s%s%s\n\n", path, alias, optstring, argstring, cmdstring)
 	}
 	fmt.Fprintln(s)
 	return s.String()

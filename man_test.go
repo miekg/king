@@ -11,14 +11,7 @@ var manf = &kong.Flag{Value: &kong.Value{Name: "man", Help: "how context-sensiti
 func TestMan(t *testing.T) {
 	parser := kong.Must(&T{})
 	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
-	m.Manual(parser.Model.Node, "more")
-	println(string(m.Out()))
-}
-
-func TestManT2(t *testing.T) {
-	parser := kong.Must(&T{})
-	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
-	m.Manual(parser.Model.Node, "even-more")
+	m.Manual(parser.Model.Node, "even-more do-even-more", "ListEvenMore")
 	println(string(m.Out()))
 	m.Write()
 }

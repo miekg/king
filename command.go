@@ -26,8 +26,9 @@ var (
 	_ Completer = (*Bash)(nil)
 )
 
-// TODO(miek): commandName vs the name used in the manual...
-func nodeName(n *kong.Node) string {
+// commandName returns the name of the command node, it takes name from the cmd tag, if that is empty the
+// node's name is returned.
+func commandName(n *kong.Node) string {
 	name := n.Tag.Get("cmd")
 	if name != "" {
 		return name
@@ -35,14 +36,14 @@ func nodeName(n *kong.Node) string {
 	return n.Name
 }
 
-func nodeByPath(n *kong.Node, path []string) *kong.Node {
+func nodePath(n *kong.Node, path []string) *kong.Node {
 	if len(path) == 0 {
 		return n
 	}
 
 	for _, c := range n.Children {
 		if c.Name == path[0] {
-			if x := nodeByPath(c, path[1:]); x != nil {
+			if x := nodePath(c, path[1:]); x != nil {
 				return x
 			}
 		}
@@ -50,8 +51,8 @@ func nodeByPath(n *kong.Node, path []string) *kong.Node {
 	return nil
 }
 
-// commandName returns the full path of the kong node. Any alias is ignored.
-func commandName(n *kong.Node) (out string) {
+// funcName returns the full path of the kong node for use as a function name. Any alias is ignored.
+func funcName(n *kong.Node) (out string) {
 	root := n
 	for root.Parent != nil {
 		root = root.Parent
