@@ -16,10 +16,8 @@ func TestMan(t *testing.T) {
 	m.Write()
 }
 
-func TestMan2(t *testing.T) {
+func TestManNoSuchNode(t *testing.T) {
 	parser := kong.Must(&T{})
-	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
-	m.Manual(parser.Model.Node, "even-more", "ListMore", "c")
-	println(string(m.Out()))
-	m.Write()
+	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "does-not-exist", "", "c")
 }

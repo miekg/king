@@ -101,6 +101,9 @@ func (m *Man) Write(w ...io.Writer) error {
 func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	fields := strings.Fields(path)
 	cmd := nodePath(k, fields)
+	if cmd == nil {
+		return
+	}
 	m.name = altname
 
 	funcMap := template.FuncMap{
@@ -120,7 +123,7 @@ func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	tmpl := &template.Template{}
 	var err error
 
-	tmpl = template.New("generated").Funcs(funcMap)
+	tmpl = template.New("manualpage").Funcs(funcMap)
 	tmpl, err = tmpl.Parse(m.Template)
 	if err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
