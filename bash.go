@@ -144,7 +144,7 @@ func (b Bash) writeApp(buf io.StringWriter, cmd *kong.Node) {
 func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
 	b.writeFilterFunc(buf)
 
-	cmdName := commandName(cmd)
+	cmdName := funcName(cmd)
 	if b.name != "" {
 		writeString(buf, fmt.Sprintf("\n_%s_completions() {\n", b.name))
 	} else {
