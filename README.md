@@ -41,7 +41,7 @@ And then assign it the to `Flags` in Zsh, Bash or Man.
 
 Note that for completion you give it a *kong.Node and the completion rolls out, for manual creation you give
 it the *upper* `*kong.Node`and a path through the`cmd` field names.
-This is needed because for manual creation a lot of documentation tags are defined on that parent.
+This is needed because we need a fully parsed Node tree as made by Kong to have access to all tags.
 
 Run the tests to see example files being created.
 
