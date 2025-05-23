@@ -17,8 +17,10 @@ type Completer interface {
 	Completion(k *kong.Node, altname string)
 	// Out returns the generated shell completion script.
 	Out() []byte
-	// Write writes the generated shell completion script to the appropiate file, for Zsh this is _exename and for Bash this is exename.bash
-	Write() error
+	// Write writes the generated shell completion script to the appropiate file, for Zsh this is _exename and
+	// for Bash this is exename.bash, for manual this is m.name.m.Section. If the optional writer is given it
+	// contents is written to that.
+	Write(w ...io.Writer) error
 }
 
 var (
