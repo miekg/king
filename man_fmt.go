@@ -8,7 +8,8 @@ import (
 	"github.com/alecthomas/kong"
 )
 
-// formatFlag is used to format an option. If quote is given and true the whole thing is indented.
+// formatFlag is used to format an option. If quote is given and true the whole thing is indented, this is
+// used then grouped options are written out.
 func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	q := ""
 	if len(quote) > 0 {
@@ -44,7 +45,7 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		fmt.Fprintf(s, " This option can be repeated.")
 	}
 	if f.Format != "" {
-		fmt.Fprintf(s, " This must be formatted according as %q.", f.Format)
+		fmt.Fprintf(s, " This must be formatted according to %q.", f.Format)
 	}
 
 	if f.Enum != "" {
@@ -159,8 +160,6 @@ func formatArg(s io.Writer, p *kong.Positional) {
 }
 
 func formatCmd(s io.Writer, c *kong.Command) {
-	// todo: cmds are not printed in synopsis
-	// fmt.Fprintf(s, "%+v\n", c)
 	name := c.Name
 	if x := c.Tag.Get("cmd"); x != "" {
 		name = x
