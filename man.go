@@ -214,7 +214,7 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		cmdstring += cmdname
 	}
 	if len(cmdstring) > 40 { // dumb check, but we can have a lorge number of subcommands
-		cmdstring = " *[COMMANDS]*..."
+		cmdstring = " *[COMMAND]*..."
 	}
 
 	// drop the last element in path
