@@ -97,9 +97,22 @@ func (m *Man) Write(w ...io.Writer) error {
 // When path is is not empty it should have a list of command names which are followed to find the node
 // for which we generate the manual page. This path is also used to construct the command line(s) in the synopsis.
 //
-// rootname is the name of the main executable, this can now be put as a tag on the main node, as that node itself can't carry struct tags.
+// rootname is the name of the main executable, this can't be put as a tag on the main node, as that node itself can't carry struct tags.
+//
+// To generate a manual page for the main node, `k` we need a description and help, this can be done via:
+//
+//	type WrapT struct {
+//		Wrap MyCli `cmd:"" help:"my help" description:"my desc"`
+//	}
+//
+// and then call Manual with: m.Manual(parser.Model.Node, "_wrap", "MyExec", "")
+// The prevent "wrap" showing up as a valid command, is can be prefixed it with _. This only checked on the
+// first element in path.
 func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	fields := strings.Fields(path)
+	if strings.HasPrefix(fields[0], "_") {
+		fields[0] = fields[0][1:]
+	}
 	cmd := nodePath(k, fields)
 	if cmd == nil {
 		return
@@ -204,6 +217,8 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		cmdstring = " *[COMMANDS]*..."
 	}
 
+	// drop the last element in path
+	ignore := strings.HasPrefix(path, "_")
 	fields := strings.Fields(path)
 	path = ""
 	if len(fields) > 0 {
@@ -217,11 +232,12 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
 	fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
-	fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
-	for _, alias := range cmd.Aliases {
-		fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, alias, optstring, argstring, cmdstring)
+	if !ignore {
+		fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
+		for _, alias := range cmd.Aliases {
+			fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, alias, optstring, argstring, cmdstring)
+		}
 	}
-	fmt.Fprintln(s)
 	return s.String()
 }
 
