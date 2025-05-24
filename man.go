@@ -36,7 +36,7 @@ type Man struct {
 //
 //   - name: generate a <cmdname> - <single line synopsis>. The node's help is used for this.
 //   - synopsis: shows the argument and options. If the node has aliases they are shown here as well.
-//   - description: the description of the command's function. The node (non-Kong) "description" tag is used for
+//   - description: the description of the command's function. The node's (non-Kong) "description" tag is used for
 //     this.
 //   - commands: a rundown of each of the commands this command has.
 //   - arguments: a rundown of each of the arguments this command has.
@@ -213,7 +213,7 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		}
 		cmdstring += cmdname
 	}
-	if len(cmdstring) > 40 { // dumb check, but we can have a lorge number of subcommands
+	if len(cmdstring) > 40 { // dumb check, but we can have a large number of subcommands
 		cmdstring = " *[COMMAND]*..."
 	}
 
