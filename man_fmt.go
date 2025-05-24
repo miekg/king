@@ -24,12 +24,24 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		fmt.Fprintf(s, ", `-%c`", f.Short)
 	}
 
+	target := func(f *kong.Flag) string {
+		if f.Value.Target.IsValid() {
+			return f.Value.Target.Type().String()
+		}
+		return ""
+	}
+
 	switch {
 	case f.IsCounter():
 	case f.IsBool():
 
 	case f.PlaceHolder != "":
 		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.FormatPlaceHolder()))
+
+	case target(f) == "*string" || target(f) == "string":
+		fallthrough
+	case target(f) == "*int" || target(f) == "int":
+		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
 	}
 
 	fmt.Fprintln(s)

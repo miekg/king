@@ -31,7 +31,8 @@ type T2 struct {
 
 type (
 	T3 struct {
-		Bool *string `help:"allow it too_too." negetable:""`
+		Bool   *bool   `help:"allow a bool." negetable:""`
+		String *string `help:"allow a string."`
 
 		Arg string `arg:"" help:"This is another arg." placeholder:"bliep"`
 	}
