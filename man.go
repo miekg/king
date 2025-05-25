@@ -23,12 +23,13 @@ import (
 // Man is a manual page generator.
 type Man struct {
 	name      string
+	manual    []byte
 	Section   int // See mmark's documentation
 	Area      string
 	WorkGroup string
-	Template  string // If empty [ManTemplate] is used.
-	manual    []byte
+	Template  string       // If empty [ManTemplate] is used.
 	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal flags.
+	Options   []Option
 }
 
 // ManTemplate is the default manual page template used when generating a manual page. Where each function
