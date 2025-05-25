@@ -38,10 +38,19 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	case f.PlaceHolder != "":
 		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.FormatPlaceHolder()))
 
-	case target(f) == "*string" || target(f) == "string":
-		fallthrough
-	case target(f) == "*int" || target(f) == "int":
-		fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
+	default:
+		switch target(f) {
+		case "*string", "string":
+			fallthrough
+		case "int", "int32", "int64", "uint", "uint32", "uint64":
+			fallthrough
+		case "*int", "*int32", "*int64", "*uint", "*uint32", "*uint64":
+			fallthrough
+		case "float", "float32", "float64":
+			fallthrough
+		case "*float", "*float32", "*float64":
+			fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
+		}
 	}
 
 	fmt.Fprintln(s)
