@@ -123,7 +123,7 @@ func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	funcMap := template.FuncMap{
 		"name":        func() string { return name(cmd, altname) },
 		"description": func() string { return description(cmd) },
-		"synopsis":    func() string { return synopsis(cmd, path, altname, rootname) },
+		"synopsis":    func() string { return m.synopsis(cmd, path, altname, rootname) },
 		"arguments":   func() string { return arguments(cmd) },
 		"commands":    func() string { return commands(cmd) },
 		"options":     func() string { return options(cmd) },
@@ -167,7 +167,7 @@ func name(cmd *kong.Node, altname string) string {
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", altname, help)
 }
 
-func synopsis(cmd *kong.Node, path, altname, rootname string) string {
+func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	s := &strings.Builder{}
 
 	optstring := " *[OPTION]*"
@@ -229,6 +229,9 @@ func synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		rootname += " "
 	}
 	if path != "" {
+		for _, opt := range m.Options {
+			path = opt.Apply(path)
+		}
 		path += " "
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
