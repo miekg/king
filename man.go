@@ -29,7 +29,6 @@ type Man struct {
 	WorkGroup string
 	Template  string       // If empty [ManTemplate] is used.
 	Flags     []*kong.Flag // Any global flags that the should Application Node have. There are documented after the normal flags.
-	Options   []Option
 }
 
 // ManTemplate is the default manual page template used when generating a manual page. Where each function
@@ -229,9 +228,6 @@ func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		rootname += " "
 	}
 	if path != "" {
-		for _, opt := range m.Options {
-			path = opt.Apply(path)
-		}
 		path += " "
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
