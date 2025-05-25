@@ -191,9 +191,9 @@ func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	}
 	for _, f := range cmd.Flags {
 		if f.Required {
-			optstring += " " + f.Name
+			optstring += " --" + f.Name
 			if f.PlaceHolder != "" {
-				optstring += " *" + strings.ToUpper(f.PlaceHolder) + "*"
+				optstring += " *" + strings.ToUpper(f.FormatPlaceHolder()) + "*"
 			}
 		}
 	}
