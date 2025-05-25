@@ -1,5 +1,6 @@
 // Package king is used to generate completions for https://github.com/alecthomas/kong.
 // Unlike most other completers this package also completes positional arguments for both Bash and Zsh.
+// It can also be used to generate manual pages for a kong command line.
 package king
 
 import (
