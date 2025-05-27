@@ -34,14 +34,18 @@ type Man struct {
 // ManTemplate is the default manual page template used when generating a manual page. Where each function
 // used is:
 //
-//   - name: generate a <cmdname> - <single line synopsis>. The node's help is used for this.
+//   - name: generate a <cmdname> - <single line synopsis>. The node's help is used for this. The removes the final dot from the help, and lowercases
+//     the first letter if the word isn't all caps.
+//     The command's _altname_ is always used here.
 //   - synopsis: shows the argument and options. If the node has aliases they are shown here as well.
 //   - description: the description of the command's function. The node's (non-Kong) "description" tag is used for
 //     this.
-//   - commands: a rundown of each of the commands this command has.
+//   - commands: a rundown of each of the subcommands this command has.
 //   - arguments: a rundown of each of the arguments this command has.
 //   - options: a list documenting each of the options.
 //   - globals: any global flags, from m.Flags.
+//
+// Note that the TOML manual header is always used.
 const ManTemplate = `{{name -}}
 
 {{synopsis -}}
@@ -163,6 +167,9 @@ workgroup = "%s"
 // name implements the template func name.
 func name(cmd *kong.Node, altname string) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
+	if strings.ToUpper(help) != help && len(help) > 2 { // not all caps
+		help = strings.ToLower(help[0:1]) + help[1:]
+	}
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", altname, help)
 }
 
