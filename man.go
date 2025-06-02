@@ -197,6 +197,9 @@ func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		}
 	}
 	for _, f := range cmd.Flags {
+		if f.Hidden {
+			continue
+		}
 		if f.Required {
 			optstring += " --" + f.Name
 			if f.PlaceHolder != "" {
