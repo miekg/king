@@ -127,10 +127,10 @@ func (b Bash) writeCommand(buf io.StringWriter, cmd *kong.Node, parents ...strin
 		}
 		return
 	}
-	//'group add')
+	//'group add'*)
 	//  while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_xxx_filter "--gid --auto --man --help")" -- "$cur")
 	//  ;;
-	writeString(buf, fmt.Sprintf(`    '%s')`+"\n", strings.TrimSpace(p)))
+	writeString(buf, fmt.Sprintf(`    '%s'*)`+"\n", strings.TrimSpace(p)))
 	completions := completions(cmd)
 	writeString(buf, "      "+b.compReply(completions))
 	writeString(buf, "      ;;\n")
@@ -165,7 +165,10 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
 
 `)
 	if hasCommands(cmd) {
-		b.writeCommand(buf, cmd)
+		newbuf := &strings.Builder{}
+		b.writeCommand(newbuf, cmd)
+		sorted := sortcmd(newbuf.String())
+		writeString(buf, sorted)
 	}
 	for _, f := range cmd.Flags {
 		b.writeFlag(buf, f)
