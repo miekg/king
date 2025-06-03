@@ -11,7 +11,7 @@ import (
 )
 
 func compzTest(t *testing.T, completionfile, exe string) []byte {
-	tmpl, err := template.New("comptest.zsh.tmpl").ParseFiles("comptest.zsh.tmpl")
+	tmpl, err := template.New("comptest.zsh.tmpl").ParseFiles("testdata/comptest.zsh.tmpl")
 	if err != nil {
 		panic(err)
 	}
