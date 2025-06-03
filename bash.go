@@ -165,7 +165,10 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
 
 `)
 	if hasCommands(cmd) {
-		b.writeCommand(buf, cmd)
+		newbuf := &strings.Builder{}
+		b.writeCommand(newbuf, cmd)
+		sorted := sortcmd(newbuf.String())
+		writeString(buf, sorted)
 	}
 	for _, f := range cmd.Flags {
 		b.writeFlag(buf, f)
