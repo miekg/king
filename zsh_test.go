@@ -55,3 +55,14 @@ func TestZsh(t *testing.T) {
 		}
 	}
 }
+
+func TestAction(t *testing.T) {
+	parser := kong.Must(&T1{})
+	z := &Zsh{}
+	const exp = `--super-string=[complete this string]:complete this string:_values 'super-string' $(echo bla bloep)"`
+	z.Completion(parser.Model.Node, "t1")
+	ok := bytes.Contains(z.Out(), []byte(exp))
+	if !ok {
+		t.Fatalf("expected %s to be present, but did not found it", exp)
+	}
+}

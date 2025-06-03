@@ -122,29 +122,8 @@ func completion(cmd *kong.Value, shell string) string {
 		return ""
 	}
 	if strings.HasPrefix(comp, "<") && strings.HasSuffix(comp, ">") {
-		comp := comp[1 : len(comp)-2]
-		switch comp {
-		case "file", "directory":
-			if shell == "zsh" {
-				return "_files"
-			}
-			return comp
-		case "group":
-			if shell == "zsh" {
-				return "_groups"
-			}
-			return comp
-		case "user":
-			if shell == "zsh" {
-				return "_users"
-			}
-			return comp
-		case "export":
-			if shell == "zsh" {
-				return "_parameters"
-			}
-			return comp
-		}
+		comp := comp[1 : len(comp)-1]
+		return toAction(comp, shell)
 	}
 	return "$(" + comp + ")"
 }
@@ -170,4 +149,25 @@ func flagEnvs(flag *kong.Flag) []string {
 		}
 	}
 	return values
+}
+
+// toAction returns the proper action per shell.
+func toAction(action, shell string) string {
+	switch shell {
+	case "zsh":
+		return zshActions[action]
+	case "bash":
+		return action
+	case "fish":
+		return ""
+	}
+	return ""
+}
+
+var zshActions = map[string]string{
+	"file":      "_files",
+	"directory": "_files",
+	"group":     "_groups",
+	"user":      "_users",
+	"export":    "_parameters",
 }
