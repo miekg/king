@@ -55,3 +55,11 @@ func TestZsh(t *testing.T) {
 		}
 	}
 }
+
+func TestAction(t *testing.T) {
+	parser := kong.Must(&T3{})
+	z := &Zsh{}
+	z.Completion(parser.Model.Node, "myaction")
+	println(string(z.Out()))
+	// z.Write()
+}
