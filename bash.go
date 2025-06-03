@@ -68,6 +68,10 @@ func (b Bash) writeFilterFunc(buf io.StringWriter) {
 }
 
 func (b Bash) compReply(completions []string) string {
+	if len(completions) == 1 && !strings.HasPrefix(completions[0], "$") { // action
+		format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -A %s -- "$cur")` + "\n"
+		return fmt.Sprintf(format, completions[0])
+	}
 	format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_%s_filter "%s")" -- "$cur")` + "\n"
 	return fmt.Sprintf(format, b.name, strings.Join(completions, " "))
 }
@@ -87,8 +91,8 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 	if enums := flagEnums(flag); len(enums) > 0 {
 		completions = enums
 	}
-	if comp := completion(flag.Value, "bash"); comp != "" {
-		completions = []string{comp}
+	if comptag := completion(flag.Value, "bash"); comptag != "" {
+		completions = []string{comptag}
 	}
 	if envs := flagEnvs(flag); len(envs) > 0 {
 		for i := range envs {
@@ -174,8 +178,8 @@ func (b Bash) gen(buf io.StringWriter, cmd *kong.Node) {
 
 		for i, p := range cmd.Positional {
 			writeString(buf, fmt.Sprintf("\n"+`        '%d')`+"\n", i+1))
-			completions := []string{completion(p, "bash")}
-			writeString(buf, "          "+b.compReply(completions))
+			comptag := []string{completion(p, "bash")}
+			writeString(buf, "          "+b.compReply(comptag))
 			writeString(buf, "          return\n          ;;\n")
 		}
 
