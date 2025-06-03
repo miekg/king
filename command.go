@@ -171,3 +171,24 @@ func flagEnvs(flag *kong.Flag) []string {
 	}
 	return values
 }
+
+// toAction returns the proper action per shell.
+func toAction(action, shell string) string {
+	switch shell {
+	case "zsh":
+		return zshActions[action]
+	case "bash":
+		return action
+	case "fish":
+		return ""
+	}
+	return ""
+}
+
+var zshActions = map[string]string{
+	"file":      "_files",
+	"directory": "_files",
+	"group":     "_groups",
+	"user":      "_users",
+	"export":    "_parameters",
+}
