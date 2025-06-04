@@ -38,7 +38,12 @@ func sortcmd(buf string) string {
 	for k := range cases {
 		keys = append(keys, k)
 	}
-	slices.SortFunc(keys, func(a, b string) int { return len(b) - len(a) })
+	slices.SortFunc(keys, func(a, b string) int {
+		if x := len(b) - len(a); x != 0 {
+			return x
+		}
+		return strings.Compare(a, b)
+	})
 	b := &strings.Builder{}
 	for _, k := range keys {
 		b.WriteString(cases[k])
