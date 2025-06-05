@@ -27,6 +27,7 @@ type Completer interface {
 var (
 	_ Completer = (*Zsh)(nil)
 	_ Completer = (*Bash)(nil)
+	_ Completer = (*Bash)(nil)
 )
 
 // commandName returns the name of the command node, it takes name from the cmd tag, if that is empty the
