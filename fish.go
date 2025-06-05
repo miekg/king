@@ -25,7 +25,7 @@ func (f *Fish) Write(w ...io.Writer) error {
 	if len(w) > 0 {
 		w[0].Write(f.completion)
 	}
-	return os.WriteFile("_"+f.name, f.completion, 0644) // no idea what fish needs
+	return os.WriteFile(f.name+".fish", f.completion, 0644) // no idea what fish needs
 }
 
 func (f *Fish) Completion(k *kong.Node, altname string) {
