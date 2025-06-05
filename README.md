@@ -5,8 +5,9 @@ ability to generate (good) shell completions. There are some integrations but th
 changes. With _king_ you can just generate the completion files separately from a `kong.Node`.
 
 This package copies from [gum](https://github.com/charmbracelet/gum) and made into a standalone library +
-some extra features, like telling (via struct tags) how certain things must be completed. Also the Bash
-completions are completely reworked and for both Zsh and Bash positional argument completion also works.
+some extra features, like telling (via struct tags) how certain things must be completed. The Bash
+completions are completely reworked and for both Zsh and Bash have positional argument completion. For the
+Fish shell the origin _gum_ completion was used and not made better.
 
 King can _also_ generate manual pages from a Kong node, see godoc for more information.
 
