@@ -1,5 +1,7 @@
 # Completion and manual generator for kong
 
+> Create manual pages and completions for Go kong CLI programs
+
 [kong](https://github.com/alecthomas/kong) is a very nice command-line parser for Go. But it misses the
 ability to generate (good) shell completions. There are some integrations but they require source level
 changes. With _king_ you can just generate the completion files separately from a `kong.Node`.
