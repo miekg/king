@@ -1,4 +1,4 @@
-<p align="center"><img size="50%" src="king.png" /></p>
+<p align="center"><img height="40%" src="king.png" /></p>
 
 # Completion and manual generator for kong
 
