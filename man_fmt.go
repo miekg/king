@@ -115,14 +115,14 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		if len(f.Xor) == 2 {
 			// div can be "."
 			for i := range f.Xor {
-				if "--"+f.Xor[i] != f.Name {
+				if f.Xor[i] != f.Name {
 					fmt.Fprintf(s, "**--%s**%s", f.Xor[i], ".")
 				}
 			}
 		} else {
 			div := ", "
 			for i := range f.Xor {
-				if "--"+f.Xor[i] != f.Name {
+				if f.Xor[i] != f.Name {
 					fmt.Fprintf(s, "**--%s**%s", f.Xor[i], div)
 				}
 				if i == len(f.Xor)-2 {
