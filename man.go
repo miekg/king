@@ -156,7 +156,11 @@ workgroup = "%s"
 
 `
 	b := &bytes.Buffer{}
-	fmt.Fprintf(b, format, altname, m.Section, m.Area, m.WorkGroup)
+	name := altname
+	if name == "" {
+		name = fmt.Sprintf("%s %s", rootname, path)
+	}
+	fmt.Fprintf(b, format, name, m.Section, m.Area, m.WorkGroup)
 	if err = tmpl.Execute(b, nil); err != nil {
 		log.Printf("Failed to generate manual page: %s", err)
 		return
@@ -169,6 +173,9 @@ func name(cmd *kong.Node, altname string) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
 	if strings.ToUpper(help) != help && len(help) > 2 { // not all caps
 		help = strings.ToLower(help[0:1]) + help[1:]
+	}
+	if altname == "" {
+		altname = commandName(cmd)
 	}
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", altname, help)
 }
@@ -241,10 +248,14 @@ func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 		path += " "
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
-	fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
+	if altname != "" {
+		println(altname)
+		fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
+	}
 	if !ignore {
 		fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
 		for _, alias := range cmd.Aliases {
+			println(alias)
 			fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, alias, optstring, argstring, cmdstring)
 		}
 	}
