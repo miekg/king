@@ -249,13 +249,11 @@ func (m *Man) synopsis(cmd *kong.Node, path, altname, rootname string) string {
 	}
 	fmt.Fprintf(s, "## Synopsis\n\n")
 	if altname != "" {
-		println(altname)
 		fmt.Fprintf(s, "`%s`%s%s%s\n\n", altname, optstring, argstring, cmdstring)
 	}
 	if !ignore {
 		fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, commandName(cmd), optstring, argstring, cmdstring)
 		for _, alias := range cmd.Aliases {
-			println(alias)
 			fmt.Fprintf(s, "`%s%s%s`%s%s%s\n\n", rootname, path, alias, optstring, argstring, cmdstring)
 		}
 	}
