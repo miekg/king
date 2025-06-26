@@ -109,6 +109,9 @@ func completions(cmd *kong.Node) []string {
 		if f.Short != 0 {
 			completions = append(completions, "-"+fmt.Sprintf("%c", f.Short))
 		}
+		if f.Tag.Negatable != "" {
+			completions = append(completions, "--no-"+f.Name)
+		}
 	}
 	for _, p := range cmd.Positional {
 		completions = append(completions, completion(p, "bash"))

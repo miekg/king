@@ -111,6 +111,15 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 	}
 
 	str.WriteString("\"")
+
+	if f.Tag.Negatable != "" {
+		// implied boolean
+		str.WriteString(" \\\n        \"")
+		str.WriteString(fmt.Sprintf("--no-%s", f.Name))
+		str.WriteString(fmt.Sprintf("[%s]", f.Help))
+		str.WriteString("\"")
+
+	}
 	writeString(buf, str.String())
 }
 
