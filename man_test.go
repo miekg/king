@@ -18,6 +18,14 @@ func TestMan(t *testing.T) {
 	m.Write()
 }
 
+func TestManNoAlias(t *testing.T) {
+	parser := kong.Must(&T{})
+	m := &Man{Flags: []*kong.Flag{manf}, Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "even-more do-even-more", "", "c")
+	println(string(m.Out()))
+	m.Write()
+}
+
 func TestManNoSuchNode(t *testing.T) {
 	parser := kong.Must(&T{})
 	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}

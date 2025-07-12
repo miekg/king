@@ -124,7 +124,7 @@ func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	m.name = altname
 
 	funcMap := template.FuncMap{
-		"name":        func() string { return name(cmd, altname) },
+		"name":        func() string { return name(cmd, altname, rootname) },
 		"description": func() string { return description(cmd) },
 		"synopsis":    func() string { return m.synopsis(cmd, path, altname, rootname) },
 		"arguments":   func() string { return arguments(cmd) },
@@ -169,13 +169,13 @@ workgroup = "%s"
 }
 
 // name implements the template func name.
-func name(cmd *kong.Node, altname string) string {
+func name(cmd *kong.Node, altname, rootname string) string {
 	help := strings.TrimSuffix(cmd.Help, ".")
 	if strings.ToUpper(help) != help && len(help) > 2 { // not all caps
 		help = strings.ToLower(help[0:1]) + help[1:]
 	}
 	if altname == "" {
-		altname = commandName(cmd)
+		altname = rootname + " " + commandName(cmd)
 	}
 	return fmt.Sprintf("## Name\n\n%s - %s\n\n", altname, help)
 }
