@@ -1,5 +1,3 @@
-<p align="center"><img height="40%" src="king.png" /></p>
-
 # Completion and manual generator for kong
 
 > Create manual pages and completions for Go kong CLI programs
