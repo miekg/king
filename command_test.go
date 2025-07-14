@@ -33,8 +33,9 @@ type T2 struct {
 
 type (
 	T3 struct {
-		Bool   *bool   `help:"allow a bool." negetable:""`
-		String *string `help:"allow a string." completion:"<file>"`
+		Bool   *bool     `help:"allow a bool." negetable:""`
+		String *string   `help:"allow a string." completion:"<file>"`
+		Date   time.Time `help:"a date"`
 
 		Arg string `arg:"" help:"This is another arg." placeholder:"bliep"`
 	}

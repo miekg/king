@@ -49,6 +49,8 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 		case "float", "float32", "float64":
 			fallthrough
 		case "*float", "*float32", "*float64":
+			fallthrough
+		case "time.Time", "*time.Time":
 			fmt.Fprintf(s, " *%s*", strings.ToUpper(f.Name))
 		}
 	}
