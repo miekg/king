@@ -76,8 +76,8 @@ func (b Bash) compReply(completions []string) string {
 	return fmt.Sprintf(format, b.name, strings.Join(completions, " "))
 }
 
-func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string) {
-	if flag.Hidden {
+func (b Bash) writeFlag(buf io.StringWriter, f *kong.Flag, parents ...string) {
+	if f.Hidden {
 		return
 	}
 	p := ""
@@ -88,13 +88,16 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 	//   while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_xxx_filter "s3")" -- "$cur")
 	//   ;;
 	completions := []string{}
-	if enums := flagEnums(flag); len(enums) > 0 {
+	if enums := flagEnums(f); len(enums) > 0 {
 		completions = enums
 	}
-	if comptag := completion(flag.Value, "bash"); comptag != "" {
+	if comptag := completion(f.Value, "bash"); comptag != "" {
+		if f.IsBool() {
+			panic("king: a boolean flag can not have completion")
+		}
 		completions = []string{comptag}
 	}
-	if envs := flagEnvs(flag); len(envs) > 0 {
+	if envs := flagEnvs(f); len(envs) > 0 {
 		for i := range envs {
 			envs[i] = "$" + envs[i]
 		}
@@ -104,11 +107,11 @@ func (b Bash) writeFlag(buf io.StringWriter, flag *kong.Flag, parents ...string)
 	if len(completions) == 0 { // nothing to complete
 		return
 	}
-	writeString(buf, fmt.Sprintf(`    '%s'*'--%s')`+"\n", strings.TrimSpace(p), flag.Name))
+	writeString(buf, fmt.Sprintf(`    '%s'*'--%s')`+"\n", strings.TrimSpace(p), f.Name))
 	writeString(buf, "      "+b.compReply(completions))
 	writeString(buf, "      ;;\n")
-	if flag.Short != 0 {
-		writeString(buf, fmt.Sprintf(`    '%s'*'-%c')`+"\n", strings.TrimSpace(p), flag.Short))
+	if f.Short != 0 {
+		writeString(buf, fmt.Sprintf(`    '%s'*'-%c')`+"\n", strings.TrimSpace(p), f.Short))
 		writeString(buf, "      "+b.compReply(completions))
 		writeString(buf, "      ;;\n")
 	}

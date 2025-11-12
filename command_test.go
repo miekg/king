@@ -1,6 +1,11 @@
 package king
 
-import "time"
+import (
+	"testing"
+	"time"
+
+	"github.com/alecthomas/kong"
+)
 
 type CompTest struct {
 	Compfile string
@@ -41,3 +46,19 @@ type (
 	}
 	T4 struct{}
 )
+
+type T5 struct {
+	Bool *bool `help:"hello" completion:"blaa"`
+}
+
+func TestBoolCompletionPanic(t *testing.T) {
+	defer func() {
+		// without this recover it would panic and thus fail the test
+		if r := recover(); r != nil {
+			t.Log("Recovered", r)
+		}
+	}()
+	parser := kong.Must(&T5{})
+	z := &Zsh{}
+	z.Completion(parser.Model.Node, "t5")
+}

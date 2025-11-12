@@ -103,6 +103,10 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 	}
 	comptag := completion(f.Value, "zsh")
 	if comptag != "" {
+		if f.IsBool() {
+			panic("king: a boolean flag can not have completion")
+		}
+
 		if strings.HasPrefix(comptag, "_") { // action
 			str.WriteString(comptag)
 		} else {
