@@ -79,6 +79,7 @@ func (m *Man) Write(w ...io.Writer) error {
 	md := markdown.Render(doc, renderer)
 	if len(w) > 0 {
 		w[0].Write(md)
+		return nil
 	}
 	return os.WriteFile(fmt.Sprintf("%s.%d", m.name, m.Section), md, 0644)
 }
