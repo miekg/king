@@ -1,7 +1,6 @@
 package king
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -26,15 +25,25 @@ func TestManNoAlias(t *testing.T) {
 	m.Write()
 }
 
-func TestManNoSuchNode(t *testing.T) {
-	parser := kong.Must(&T{})
-	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
-	fmt.Printf("%+v\n", parser.Model.Node)
-	fmt.Printf("%+v\n", parser.Model.Tag.Get("description"))
-	m.Manual(parser.Model.Node, "does-not-exist", "", "c")
+
+type TEnv struct {
+	EnvVar string `env:"MY_ENV_VAR" help:"Some help"`
 }
 
+func TestManEnv(t *testing.T) {
+	parser := kong.Must(&TEnv{})
+	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "", "EnvExec", "envexe")
+	out := string(m.Out())
+	expected := "The default value is derived from the environment variable: `${MY_ENV_VAR}`."
+	if !strings.Contains(out, expected) {
+		t.Errorf("Expected output to contain %q, but it did not.\nOutput: %s", expected, out)
+	}
+}
+
+
 type WrapT struct {
+
 	Wrap T `cmd:"" help:"My help." description:"my desc"`
 }
 

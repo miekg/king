@@ -102,14 +102,15 @@ func formatFlag(s io.Writer, f *kong.Flag, quote ...bool) {
 	}
 
 	if f.Envs != nil {
-		for i := range f.Envs {
-			f.Envs[i] = "`${" + f.Envs[i] + "}`"
-		}
 		vars := "variables"
 		if len(f.Envs) == 1 {
 			vars = "variable"
 		}
-		fmt.Fprintf(s, " The default value is derived from the environment %s: %s.", vars, strings.Join(f.Envs, ", "))
+		formattedEnvs := make([]string, len(f.Envs))
+		for i, env := range f.Envs {
+			formattedEnvs[i] = "`${" + env + "}`"
+		}
+		fmt.Fprintf(s, " The default value is derived from the environment %s: %s.", vars, strings.Join(formattedEnvs, ", "))
 	}
 
 	if f.Xor != nil {

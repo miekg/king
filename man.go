@@ -119,7 +119,7 @@ func (m *Man) Write(w ...io.Writer) error {
 // first element in path.
 func (m *Man) Manual(k *kong.Node, path, altname, rootname string) {
 	fields := strings.Fields(path)
-	if strings.HasPrefix(fields[0], "_") {
+	if len(fields) > 0 && strings.HasPrefix(fields[0], "_") {
 		fields[0] = fields[0][1:]
 	}
 	cmd := nodePath(k, fields)
