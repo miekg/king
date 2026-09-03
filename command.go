@@ -161,7 +161,7 @@ func toAction(action, shell string) string {
 	case "zsh":
 		return zshActions[action]
 	case "bash":
-		return action
+		return "ACT{" + action + "}"
 	case "fish":
 		return ""
 	}
