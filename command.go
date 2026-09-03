@@ -26,7 +26,7 @@ type Completer interface {
 
 var (
 	_ Completer = (*Zsh)(nil)
-	_ Completer = (*Bash)(nil)
+	_ Completer = (*Fish)(nil)
 	_ Completer = (*Bash)(nil)
 )
 
