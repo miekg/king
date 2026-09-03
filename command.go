@@ -26,7 +26,7 @@ type Completer interface {
 
 var (
 	_ Completer = (*Zsh)(nil)
-	_ Completer = (*Bash)(nil)
+	_ Completer = (*Fish)(nil)
 	_ Completer = (*Bash)(nil)
 )
 
@@ -161,7 +161,7 @@ func toAction(action, shell string) string {
 	case "zsh":
 		return zshActions[action]
 	case "bash":
-		return action
+		return "ACT{" + action + "}"
 	case "fish":
 		return ""
 	}
