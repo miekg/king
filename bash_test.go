@@ -1,6 +1,7 @@
 package king
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/alecthomas/kong"
@@ -16,4 +17,15 @@ func TestBash(t *testing.T) {
 	b := &Bash{}
 	b.Completion(parser.Model.Node, "myexe")
 	b.Write()
+}
+
+func TestActionBash(t *testing.T) {
+	parser := kong.Must(&T1{})
+	b := &Bash{}
+	const exp = `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -A file -- "$cur")`
+	b.Completion(parser.Model.Node, "t1")
+	ok := bytes.Contains(b.Out(), []byte(exp))
+	if !ok {
+		t.Fatalf("expected %s to be present, but did not found it", exp)
+	}
 }

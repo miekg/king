@@ -56,7 +56,7 @@ func TestZsh(t *testing.T) {
 	}
 }
 
-func TestAction(t *testing.T) {
+func TestActionZsh(t *testing.T) {
 	parser := kong.Must(&T1{})
 	z := &Zsh{}
 	const exp = `--super-string=[complete this string]:complete this string:_values 'super-string' $(echo bla bloep)"`
