@@ -51,6 +51,10 @@ type T5 struct {
 	Bool *bool `help:"hello" completion:"blaa"`
 }
 
+type T6 struct {
+	Type string `help:"Set the backup type." enum:"kopia" default:"kopia"`
+}
+
 func TestBoolCompletionPanic(t *testing.T) {
 	defer func() {
 		// without this recover it would panic and thus fail the test

@@ -28,4 +28,13 @@ func TestActionBash(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected %s to be present, but did not found it", exp)
 	}
+
+	parser = kong.Must(&T6{})
+	b = &Bash{}
+	const notexp = `compgen -A kopia`
+	b.Completion(parser.Model.Node, "t1")
+	ok = bytes.Contains(b.Out(), []byte(notexp))
+	if ok {
+		t.Fatalf("expected %s to be not present, but did found it", notexp)
+	}
 }
