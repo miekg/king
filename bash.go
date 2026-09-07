@@ -68,7 +68,7 @@ func (b Bash) writeFilterFunc(buf io.StringWriter) {
 }
 
 func (b Bash) compReply(completions []string) string {
-	if len(completions) == 1 && strings.HasPrefix(completions[0], "ACT{") && !strings.HasSuffix(completions[0], "}") { // action and not empty
+	if len(completions) == 1 && strings.HasPrefix(completions[0], "ACT{") && strings.HasSuffix(completions[0], "}") { // action and not empty
 		comp := completions[0][4 : len(completions[0])-1]
 		format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -A %s -- "$cur")` + "\n"
 		return fmt.Sprintf(format, comp)
