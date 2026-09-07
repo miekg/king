@@ -126,7 +126,6 @@ func completion(cmd *kong.Value, shell string) string {
 		return ""
 	}
 	if strings.HasPrefix(comp, "<") && strings.HasSuffix(comp, ">") {
-		comp := comp[1 : len(comp)-1]
 		return toAction(comp, shell)
 	}
 	return "$(" + comp + ")"
@@ -155,7 +154,8 @@ func flagEnvs(flag *kong.Flag) []string {
 	return values
 }
 
-// toAction returns the proper action per shell.
+// toAction returns the proper action per shell, for bash we return the original string, for zsh we return the
+// proper completion used.
 func toAction(action, shell string) string {
 	switch shell {
 	case "zsh":
@@ -169,9 +169,9 @@ func toAction(action, shell string) string {
 }
 
 var zshActions = map[string]string{
-	"file":      "_files",
-	"directory": "_files",
-	"group":     "_groups",
-	"user":      "_users",
-	"export":    "_parameters",
+	"<file>":      "_files",
+	"<directory>": "_files",
+	"<group>":     "_groups",
+	"<user>":      "_users",
+	"<export>":    "_parameters",
 }
