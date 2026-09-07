@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -69,13 +70,15 @@ func (b Bash) writeFilterFunc(buf io.StringWriter) {
 
 func (b Bash) compReply(completions []string) string {
 	if len(completions) == 1 &&
-		!strings.HasPrefix(completions[0], "$") && !strings.HasPrefix(completions[0], "--") &&
-		strings.HasPrefix(completions[0], "<") && strings.HasSuffix(completions[0], ">") { // action and not empty
+		!strings.HasPrefix(completions[0], "$") && !strings.HasPrefix(completions[0], "--") && isAction(completions[0]) { // action and not empty
 
 		comp := completions[0][1 : len(completions[0])-1] // chop of < and >
 		format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -A %s -- "$cur")` + "\n"
 		return fmt.Sprintf(format, comp)
 	}
+
+	// in the slice of completions we can still see an action < and > these should be removed as they serve no purpose here
+	completions = slices.DeleteFunc(completions, func(x string) bool { return isAction(x) })
 
 	format := `while read -r; do COMPREPLY+=("$REPLY"); done < <(compgen -W "$(_%s_filter "%s")" -- "$cur")` + "\n"
 	return fmt.Sprintf(format, b.name, strings.Join(completions, " "))

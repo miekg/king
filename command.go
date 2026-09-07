@@ -125,7 +125,7 @@ func completion(cmd *kong.Value, shell string) string {
 	if comp == "" {
 		return ""
 	}
-	if strings.HasPrefix(comp, "<") && strings.HasSuffix(comp, ">") {
+	if isAction(comp) {
 		return toAction(comp, shell)
 	}
 	return "$(" + comp + ")"
@@ -174,4 +174,8 @@ var zshActions = map[string]string{
 	"<group>":     "_groups",
 	"<user>":      "_users",
 	"<export>":    "_parameters",
+}
+
+func isAction(s string) bool {
+	return strings.HasSuffix(s, ">") && strings.HasPrefix(s, "<")
 }
