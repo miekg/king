@@ -55,6 +55,10 @@ type T6 struct {
 	Type string `help:"Set the backup type." enum:"kopia" default:"kopia"`
 }
 
+type T7 struct {
+	File string `arg:"" help:"Context file." completion:"<file>"`
+}
+
 func TestBoolCompletionPanic(t *testing.T) {
 	defer func() {
 		// without this recover it would panic and thus fail the test

@@ -66,3 +66,17 @@ func TestActionZsh(t *testing.T) {
 		t.Fatalf("expected %s to be present, but did not found it", exp)
 	}
 }
+
+func TestActionPositionalZsh(t *testing.T) {
+	parser := kong.Must(&T7{})
+	z := &Zsh{}
+	const exp = `'1:file:_files'`
+	const notexp = `_values "file" _files`
+	z.Completion(parser.Model.Node, "t7")
+	if !bytes.Contains(z.Out(), []byte(exp)) {
+		t.Fatalf("expected %s to be present, but did not found it", exp)
+	}
+	if bytes.Contains(z.Out(), []byte(notexp)) {
+		t.Fatalf("expected %s to be not present, but did found it", notexp)
+	}
+}

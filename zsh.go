@@ -140,12 +140,17 @@ func (z Zsh) writeFlags(buf io.StringWriter, cmd *kong.Node) {
 }
 
 func (z Zsh) writePositional(buf io.StringWriter, cmd *kong.Node) {
-	// '1: : _values "<name>" $(c volume-server list --comp)'  -- when there is completion
+	// '1: : _values "<name>" $(c volume-server list --comp)'  -- when there is a dynamic completion
+	// '1:file:_files' -- when the completion is an action, it is used directly
 	// '2:yubikey:' -- when there is no completion, this is the name of the node.
 	for i, p := range cmd.Positional {
-		if comptag := completion(p, "zsh"); comptag == "" {
+		comptag := completion(p, "zsh")
+		switch {
+		case comptag == "":
 			writeString(buf, fmt.Sprintf("        \"%d:%s:\"", i+1, strings.ToLower(p.Name)))
-		} else {
+		case strings.HasPrefix(comptag, "_"): // action
+			writeString(buf, fmt.Sprintf("        '%d:%s:%s'", i+1, strings.ToLower(p.Name), comptag))
+		default:
 			writeString(buf, fmt.Sprintf("        '%d: : _values \"%s\" %s'", i+1, p.Name, comptag))
 		}
 		if i < len(cmd.Positional)-1 {
