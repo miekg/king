@@ -1,6 +1,6 @@
 # Completion and manual generator for kong
 
-> Create manual pages and completions for Go kong CLI programs
+> The missing completions for Go kong CLI programs
 
 [kong](https://github.com/alecthomas/kong) is a very nice command-line parser for Go. But it misses the
 ability to generate (good) shell completions. There are some integrations but they require source level
@@ -42,7 +42,7 @@ fl := &kong.Flag{
 And then assign it the to `Flags` in Zsh, Bash or Man.
 
 Note that for completion you give it a *kong.Node and the completion rolls out, for manual creation you give
-it the *root* `*kong.Node`and a path through the`cmd` field names.
+it the _root_ `*kong.Node`and a path through the`cmd` field names.
 This is needed because we need a fully parsed Node tree as made by Kong to have access to all tags.
 
 Run the tests to see example files being created.
