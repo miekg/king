@@ -25,7 +25,6 @@ func TestManNoAlias(t *testing.T) {
 	m.Write()
 }
 
-
 type TEnv struct {
 	EnvVar string `env:"MY_ENV_VAR" help:"Some help"`
 }
@@ -41,9 +40,23 @@ func TestManEnv(t *testing.T) {
 	}
 }
 
+type TXor struct {
+	Enable  bool `xor:"enable,disable" help:"Some help"`
+	Disable bool `xor:"enable,disable" help:"Some help"`
+}
+
+func TestManXor(t *testing.T) {
+	parser := kong.Must(&TXor{})
+	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
+	m.Manual(parser.Model.Node, "", "OrExec", "orexe")
+	out := string(m.Out())
+	expected := "Some help This option can not be used together with: **--enable**."
+	if !strings.Contains(out, expected) {
+		t.Errorf("Expected output to contain %q, but it did not.\nOutput: %s", expected, out)
+	}
+}
 
 type WrapT struct {
-
 	Wrap T `cmd:"" help:"My help." description:"my desc"`
 }
 
@@ -51,7 +64,7 @@ func TestManMain(t *testing.T) {
 	parser := kong.Must(&WrapT{})
 	m := &Man{Section: 1, Area: "User Commands", WorkGroup: "The hard working team"}
 	m.Manual(parser.Model.Node, "_wrap", "MyExec", "")
-	println(string(m.Out()))
+	t.Log(string(m.Out()))
 }
 
 func TestManHelp(t *testing.T) {
