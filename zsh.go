@@ -54,13 +54,13 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 	str.WriteString("        ")
 	if f.Short != 0 {
 		str.WriteString("'(")
-		str.WriteString(fmt.Sprintf("-%c --%s", f.Short, f.Name))
+		fmt.Fprintf(&str, "-%c --%s", f.Short, f.Name)
 		if !f.IsBool() {
 			str.WriteString("=")
 		}
 		str.WriteString(")'")
 		str.WriteString("{")
-		str.WriteString(fmt.Sprintf("-%c,--%s", f.Short, f.Name))
+		fmt.Fprintf(&str, "-%c,--%s", f.Short, f.Name)
 		if !f.IsBool() {
 			str.WriteString("=")
 		}
@@ -68,12 +68,12 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 		str.WriteString("\"")
 	} else {
 		str.WriteString("\"")
-		str.WriteString(fmt.Sprintf("--%s", f.Name))
+		fmt.Fprintf(&str, "--%s", f.Name)
 		if !f.IsBool() {
 			str.WriteString("=")
 		}
 	}
-	str.WriteString(fmt.Sprintf("[%s]", f.Help))
+	fmt.Fprintf(&str, "[%s]", f.Help)
 	if !f.IsBool() {
 		str.WriteString(":")
 		str.WriteString(strings.ToLower(f.Help))
@@ -90,16 +90,19 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 		}
 		str.WriteString(")")
 	}
-	values = flagEnvs(f)
-	if len(values) > 0 {
-		str.WriteString("(")
-		for i, v := range values {
-			str.WriteString("$" + v)
-			if i < len(values)-1 {
-				str.WriteString(" ")
+	if !f.IsBool() {
+		values = flagEnvs(f)
+		if len(values) > 0 {
+			str.WriteString("(")
+			for i, v := range values {
+				str.WriteString("$")
+				str.WriteString(v)
+				if i < len(values)-1 {
+					str.WriteString(" ")
+				}
 			}
+			str.WriteString(")")
 		}
-		str.WriteString(")")
 	}
 	comptag := completion(f.Value, "zsh")
 	if comptag != "" {
@@ -110,7 +113,7 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 		if strings.HasPrefix(comptag, "_") { // action
 			str.WriteString(comptag)
 		} else {
-			str.WriteString(fmt.Sprintf(`_values '%s' %s`, f.Name, comptag))
+			fmt.Fprintf(&str, `_values '%s' %s`, f.Name, comptag)
 		}
 	}
 
@@ -119,8 +122,8 @@ func (z Zsh) writeFlag(buf io.StringWriter, f *kong.Flag) {
 	if f.Tag.Negatable != "" {
 		// implied boolean
 		str.WriteString(" \\\n        \"")
-		str.WriteString(fmt.Sprintf("--no-%s", f.Name))
-		str.WriteString(fmt.Sprintf("[%s]", f.Help))
+		fmt.Fprintf(&str, "--no-%s", f.Name)
+		fmt.Fprintf(&str, "[%s]", f.Help)
 		str.WriteString("\"")
 
 	}
